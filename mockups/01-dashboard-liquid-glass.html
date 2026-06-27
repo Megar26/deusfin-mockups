@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin — Обзор · Liquid Glass</title>
+<style>
+  :root{
+    --ink:#0a1020;
+    --ink-soft:#3b4a66;
+    --muted:#6b7890;
+    --glass: rgba(255,255,255,.46);
+    --glass-2: rgba(255,255,255,.30);
+    --stroke: rgba(255,255,255,.65);
+    --stroke-soft: rgba(255,255,255,.35);
+    --shadow: 0 14px 40px rgba(20,30,70,.18), 0 2px 8px rgba(20,30,70,.08);
+    --pos:#0f9d6b; --neg:#e0485a; --warn:#c98a14;
+    --r-lg:30px; --r-md:22px; --r-sm:16px; --r-pill:999px;
+    --font:-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Inter","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:var(--font);
+    color:var(--ink);
+    background:#dfe6f5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* ===== Vibrant wallpaper behind the glass ===== */
+  .wall{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
+     radial-gradient(120% 120% at 100% 0%, #cfe0ff 0%, transparent 55%),
+     radial-gradient(120% 120% at 0% 100%, #ffe3f1 0%, transparent 55%),
+     linear-gradient(160deg,#eaf0ff 0%,#f4ecff 45%,#e9fbff 100%);}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.8;mix-blend-mode:multiply;animation:drift 22s ease-in-out infinite;}
+  .b1{width:540px;height:540px;left:-80px;top:-120px;background:#6aa8ff;}
+  .b2{width:480px;height:480px;right:-60px;top:-40px;background:#b388ff;animation-delay:-6s;}
+  .b3{width:520px;height:520px;left:30%;bottom:-180px;background:#5be0c6;animation-delay:-11s;}
+  .b4{width:420px;height:420px;right:8%;bottom:-120px;background:#ff9ecb;animation-delay:-15s;}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(40px,30px) scale(1.08);}66%{transform:translate(-30px,20px) scale(.96);}}
+
+  .app{max-width:1180px;margin:0 auto;padding:22px 26px 60px;}
+
+  /* ===== Glass primitive ===== */
+  .glass{
+    background:var(--glass);
+    backdrop-filter:blur(26px) saturate(185%);
+    -webkit-backdrop-filter:blur(26px) saturate(185%);
+    border:1px solid var(--stroke);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.75), inset 0 -1px 0 rgba(255,255,255,.18);
+    position:relative;
+  }
+  .glass::after{ /* specular sheen */
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(180deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 28%);
+    mix-blend-mode:screen;opacity:.7;
+  }
+
+  /* ===== Top bar ===== */
+  .topbar{display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:var(--r-pill);margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:18px;}
+  .brand .dot{width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,#2a7bff,#16d6c8);box-shadow:0 4px 12px rgba(42,123,255,.45);}
+  .brand small{font-weight:600;color:var(--muted);font-size:12px;background:rgba(255,255,255,.5);padding:3px 9px;border-radius:var(--r-pill);}
+  .nav{display:flex;gap:4px;margin:0 auto;background:rgba(255,255,255,.32);padding:4px;border-radius:var(--r-pill);border:1px solid var(--stroke-soft);}
+  .nav a{padding:8px 16px;border-radius:var(--r-pill);font-size:14px;font-weight:600;color:var(--ink-soft);text-decoration:none;transition:.2s;}
+  .nav a.on{background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 4px 14px rgba(20,30,70,.14);}
+  .nav a:not(.on):hover{color:var(--ink);}
+  .uact{display:flex;align-items:center;gap:10px;}
+  .pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r-pill);background:rgba(255,255,255,.5);border:1px solid var(--stroke-soft);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+  .pill svg{width:14px;height:14px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ff8fb3,#a06bff);box-shadow:0 4px 12px rgba(160,107,255,.4);}
+
+  /* ===== Page head ===== */
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;padding:0 4px;}
+  .head h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.03em;}
+  .head .sub{color:var(--ink-soft);font-size:14px;margin-top:4px;font-weight:500;}
+  .seg{display:flex;gap:3px;background:rgba(255,255,255,.34);padding:4px;border-radius:var(--r-pill);border:1px solid var(--stroke-soft);backdrop-filter:blur(14px);}
+  .seg button{border:0;background:transparent;padding:8px 16px;border-radius:var(--r-pill);font:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 3px 10px rgba(20,30,70,.16);}
+
+  /* ===== KPI ===== */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;}
+  .kpi{padding:18px 20px;border-radius:var(--r-md);overflow:hidden;}
+  .kpi .lab{font-size:13px;color:var(--ink-soft);font-weight:600;display:flex;align-items:center;gap:8px;}
+  .kpi .ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;}
+  .kpi .ic svg{width:16px;height:16px;}
+  .kpi .val{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px;font-variant-numeric:tabular-nums;}
+  .kpi .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .delta{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;padding:4px 9px;border-radius:var(--r-pill);}
+  .delta.up{color:var(--pos);background:rgba(15,157,107,.12);}
+  .delta.down{color:var(--neg);background:rgba(224,72,90,.12);}
+  .spark{width:84px;height:30px;}
+
+  /* tints for kpi icons */
+  .t-blue{background:rgba(42,123,255,.16);color:#2a7bff;}
+  .t-green{background:rgba(15,157,107,.16);color:#0f9d6b;}
+  .t-purple{background:rgba(140,90,255,.16);color:#8c5aff;}
+  .t-amber{background:rgba(201,138,20,.18);color:#c98a14;}
+
+  /* ===== Alert ===== */
+  .alert{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:var(--r-md);margin-bottom:16px;
+     background:linear-gradient(90deg, rgba(255,238,205,.7), rgba(255,255,255,.4));}
+  .alert .ai{width:38px;height:38px;border-radius:12px;background:rgba(201,138,20,.18);color:var(--warn);display:grid;place-items:center;flex:none;}
+  .alert .ai svg{width:20px;height:20px;}
+  .alert b{font-weight:700;}
+  .alert .at{font-size:14.5px;color:var(--ink);}
+  .alert .as{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+  .alert .abtn{margin-left:auto;padding:9px 16px;border-radius:var(--r-pill);background:rgba(255,255,255,.7);border:1px solid var(--stroke);font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;flex:none;}
+
+  /* ===== Bento ===== */
+  .bento{display:grid;grid-template-columns:1.9fr 1fr;gap:16px;margin-bottom:16px;}
+  .card{padding:22px;border-radius:var(--r-md);}
+  .card h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em;}
+  .card .ch-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .ch-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+  .legend{display:flex;gap:16px;align-items:center;}
+  .legend span{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+  .legend i{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  /* donut */
+  .donut-wrap{display:flex;align-items:center;gap:18px;margin-top:8px;}
+  .donut{position:relative;flex:none;}
+  .donut .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;}
+  .donut .center .c1{font-size:11px;color:var(--muted);font-weight:600;}
+  .donut .center .c2{font-size:19px;font-weight:800;letter-spacing:-.02em;}
+  .dl{display:flex;flex-direction:column;gap:11px;flex:1;}
+  .dl .it{display:flex;align-items:center;gap:9px;font-size:13px;}
+  .dl .it i{width:10px;height:10px;border-radius:3px;flex:none;}
+  .dl .it .nm{color:var(--ink-soft);font-weight:600;}
+  .dl .it .pc{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;}
+
+  /* ===== bottom row ===== */
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .bars{display:flex;flex-direction:column;gap:14px;margin-top:14px;}
+  .bar .bt{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+  .bar .bt .bn{color:var(--ink-soft);font-weight:600;}
+  .bar .bt .bv{font-weight:700;font-variant-numeric:tabular-nums;}
+  .track{height:9px;border-radius:var(--r-pill);background:rgba(120,140,180,.18);overflow:hidden;}
+  .fill{height:100%;border-radius:var(--r-pill);}
+  .pay{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .pi{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;background:rgba(255,255,255,.4);border:1px solid var(--stroke-soft);}
+  .pi .pd{width:42px;text-align:center;flex:none;}
+  .pi .pd .dd{font-size:17px;font-weight:800;line-height:1;}
+  .pi .pd .mm{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  .pi .pn{font-size:13.5px;font-weight:600;}
+  .pi .pc{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;}
+  .pi .pc.out{color:var(--neg);}
+  .pi .pc.in{color:var(--pos);}
+
+  @media (max-width:960px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .bento{grid-template-columns:1fr;}
+    .row2{grid-template-columns:1fr;}
+    .nav{display:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="wall">
+    <div class="blob b1"></div><div class="blob b2"></div>
+    <div class="blob b3"></div><div class="blob b4"></div>
+  </div>
+
+  <div class="app">
+    <!-- TOP BAR -->
+    <div class="topbar glass">
+      <div class="brand"><span class="dot"></span>DeusFin<small>demo</small></div>
+      <nav class="nav">
+        <a class="on" href="#">Обзор</a>
+        <a href="#">ДДС</a>
+        <a href="#">ОПиУ</a>
+        <a href="#">Баланс</a>
+        <a href="#">Календарь</a>
+      </nav>
+      <div class="uact">
+        <div class="pill">Все юрлица
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="avatar"></div>
+      </div>
+    </div>
+
+    <!-- HEAD -->
+    <div class="head">
+      <div>
+        <h1>Обзор</h1>
+        <div class="sub">Июнь 2026 · обновлено только что</div>
+      </div>
+      <div class="seg">
+        <button>Месяц</button>
+        <button class="on">Квартал</button>
+        <button>Год</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi glass">
+        <div class="lab"><span class="ic t-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.4"/></svg></span>Деньги на счетах</div>
+        <div class="val">560 000 ₽</div>
+        <div class="row">
+          <span class="delta up">▲ 8,4%</span>
+          <svg class="spark" viewBox="0 0 84 30"><polyline fill="none" stroke="#0f9d6b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="2,24 16,20 30,22 44,14 58,16 72,8 82,5"/></svg>
+        </div>
+      </div>
+      <div class="kpi glass">
+        <div class="lab"><span class="ic t-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-8"/><path d="M20 7h-4M20 7v4"/></svg></span>Чистая прибыль</div>
+        <div class="val">377 000 ₽</div>
+        <div class="row">
+          <span class="delta up">▲ 12,1%</span>
+          <svg class="spark" viewBox="0 0 84 30"><polyline fill="none" stroke="#0f9d6b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="2,26 16,22 30,18 44,20 58,12 72,10 82,4"/></svg>
+        </div>
+      </div>
+      <div class="kpi glass">
+        <div class="lab"><span class="ic t-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M9 15l3-4 3 2 4-6"/></svg></span>EBITDA</div>
+        <div class="val">450 000 ₽</div>
+        <div class="row">
+          <span class="delta up">▲ 5,2%</span>
+          <svg class="spark" viewBox="0 0 84 30"><polyline fill="none" stroke="#8c5aff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="2,20 16,18 30,21 44,15 58,17 72,12 82,11"/></svg>
+        </div>
+      </div>
+      <div class="kpi glass">
+        <div class="lab"><span class="ic t-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg></span>Активы</div>
+        <div class="val">600 000 ₽</div>
+        <div class="row">
+          <span class="delta up">▲ 3,0%</span>
+          <svg class="spark" viewBox="0 0 84 30"><polyline fill="none" stroke="#c98a14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="2,22 16,21 30,19 44,18 58,16 72,15 82,13"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert glass">
+      <div class="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+      <div>
+        <div class="at"><b>Кассовый разрыв 15 июня</b> — не хватит <b>90 000 ₽</b></div>
+        <div class="as">Поступление от «Контур» сдвинуто на 18 июня. Рекомендуем перенести 2 платежа.</div>
+      </div>
+      <button class="abtn">Открыть календарь</button>
+    </div>
+
+    <!-- BENTO: chart + donut -->
+    <div class="bento">
+      <div class="card glass">
+        <div class="ch-head">
+          <div><h2>Денежный поток</h2><div class="ch-sub">Доходы и расходы, ₽ · по месяцам</div></div>
+          <div class="legend">
+            <span><i style="background:#2a7bff"></i>Доход</span>
+            <span><i style="background:#ff79a8"></i>Расход</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 640 250" width="100%" preserveAspectRatio="none" style="display:block">
+          <defs>
+            <linearGradient id="gIn" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2a7bff" stop-opacity=".42"/>
+              <stop offset="1" stop-color="#2a7bff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="gEx" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ff79a8" stop-opacity=".34"/>
+              <stop offset="1" stop-color="#ff79a8" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- grid -->
+          <g stroke="rgba(60,80,120,.13)" stroke-width="1">
+            <line x1="0" y1="50" x2="640" y2="50"/><line x1="0" y1="100" x2="640" y2="100"/>
+            <line x1="0" y1="150" x2="640" y2="150"/><line x1="0" y1="200" x2="640" y2="200"/>
+          </g>
+          <!-- income area+line -->
+          <path d="M40,81 L150,70 L260,56 L370,64 L480,47 L590,41 L590,200 L40,200 Z" fill="url(#gIn)"/>
+          <polyline fill="none" stroke="#2a7bff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="40,81 150,70 260,56 370,64 480,47 590,41"/>
+          <!-- expense area+line -->
+          <path d="M40,115 L150,107 L260,101 L370,98 L480,104 L590,115 L590,200 L40,200 Z" fill="url(#gEx)"/>
+          <polyline fill="none" stroke="#ff79a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="40,115 150,107 260,101 370,98 480,104 590,115"/>
+          <!-- income dots -->
+          <g fill="#fff" stroke="#2a7bff" stroke-width="2.6">
+            <circle cx="40" cy="81" r="3.6"/><circle cx="150" cy="70" r="3.6"/><circle cx="260" cy="56" r="3.6"/>
+            <circle cx="370" cy="64" r="3.6"/><circle cx="480" cy="47" r="3.6"/><circle cx="590" cy="41" r="4.6"/>
+          </g>
+          <g fill="var(--ink-soft)" font-size="12" font-weight="600" text-anchor="middle" font-family="var(--font)">
+            <text x="40" y="232">Янв</text><text x="150" y="232">Фев</text><text x="260" y="232">Мар</text>
+            <text x="370" y="232">Апр</text><text x="480" y="232">Май</text><text x="590" y="232">Июн</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="card glass">
+        <div class="ch-head"><div><h2>Структура расходов</h2><div class="ch-sub">За июнь 2026</div></div></div>
+        <div class="donut-wrap">
+          <div class="donut" style="width:140px;height:140px">
+            <svg viewBox="0 0 140 140" width="140" height="140">
+              <g transform="rotate(-90 70 70)" fill="none" stroke-width="18" stroke-linecap="butt">
+                <circle cx="70" cy="70" r="52" stroke="#2a7bff" stroke-dasharray="145 181.7" stroke-dashoffset="0"/>
+                <circle cx="70" cy="70" r="52" stroke="#16c2c2" stroke-dasharray="56.8 269.9" stroke-dashoffset="-147"/>
+                <circle cx="70" cy="70" r="52" stroke="#8c5aff" stroke-dasharray="47 279.7" stroke-dashoffset="-205.8"/>
+                <circle cx="70" cy="70" r="52" stroke="#f5a524" stroke-dasharray="43.7 283" stroke-dashoffset="-254.8"/>
+                <circle cx="70" cy="70" r="52" stroke="#ff79a8" stroke-dasharray="24.1 302.6" stroke-dashoffset="-300.5"/>
+              </g>
+            </svg>
+            <div class="center"><div><div class="c1">Всего</div><div class="c2">412 000 ₽</div></div></div>
+          </div>
+          <div class="dl">
+            <div class="it"><i style="background:#2a7bff"></i><span class="nm">ФОТ</span><span class="pc">45%</span></div>
+            <div class="it"><i style="background:#16c2c2"></i><span class="nm">Аренда</span><span class="pc">18%</span></div>
+            <div class="it"><i style="background:#8c5aff"></i><span class="nm">Маркетинг</span><span class="pc">15%</span></div>
+            <div class="it"><i style="background:#f5a524"></i><span class="nm">Налоги</span><span class="pc">14%</span></div>
+            <div class="it"><i style="background:#ff79a8"></i><span class="nm">Прочее</span><span class="pc">8%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: top expenses bars + payment calendar -->
+    <div class="row2">
+      <div class="card glass">
+        <div class="ch-head"><div><h2>Топ статьи расходов</h2><div class="ch-sub">Доля от месячного бюджета</div></div></div>
+        <div class="bars">
+          <div class="bar"><div class="bt"><span class="bn">Фонд оплаты труда</span><span class="bv">185 400 ₽</span></div><div class="track"><div class="fill" style="width:90%;background:linear-gradient(90deg,#2a7bff,#5aa0ff)"></div></div></div>
+          <div class="bar"><div class="bt"><span class="bn">Аренда и коммуналка</span><span class="bv">74 160 ₽</span></div><div class="track"><div class="fill" style="width:50%;background:linear-gradient(90deg,#10b8b8,#5be0c6)"></div></div></div>
+          <div class="bar"><div class="bt"><span class="bn">Маркетинг</span><span class="bv">61 800 ₽</span></div><div class="track"><div class="fill" style="width:42%;background:linear-gradient(90deg,#8c5aff,#b388ff)"></div></div></div>
+          <div class="bar"><div class="bt"><span class="bn">Налоги и взносы</span><span class="bv">57 680 ₽</span></div><div class="track"><div class="fill" style="width:38%;background:linear-gradient(90deg,#f5a524,#ffc863)"></div></div></div>
+        </div>
+      </div>
+
+      <div class="card glass">
+        <div class="ch-head"><div><h2>Платёжный календарь</h2><div class="ch-sub">Ближайшие движения</div></div></div>
+        <div class="pay">
+          <div class="pi"><div class="pd"><div class="dd">28</div><div class="mm">июн</div></div><div class="pn">Зарплата · 1-я часть</div><div class="pc out">−92 000 ₽</div></div>
+          <div class="pi"><div class="pd"><div class="dd">30</div><div class="mm">июн</div></div><div class="pn">Оплата от «Сбер»</div><div class="pc in">+140 000 ₽</div></div>
+          <div class="pi"><div class="pd"><div class="dd">02</div><div class="mm">июл</div></div><div class="pn">Аренда офиса</div><div class="pc out">−48 000 ₽</div></div>
+          <div class="pi"><div class="pd"><div class="dd">05</div><div class="mm">июл</div></div><div class="pn">Авансовый платёж УСН</div><div class="pc out">−31 000 ₽</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

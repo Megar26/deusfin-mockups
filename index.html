@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin — Макеты</title>
+<style>
+  :root{
+    --ink:#0a1020;--ink-soft:#3b4a66;--muted:#6b7890;
+    --glass:rgba(255,255,255,.5);--stroke:rgba(255,255,255,.65);--stroke-soft:rgba(255,255,255,.35);
+    --shadow:0 14px 40px rgba(20,30,70,.16),0 2px 8px rgba(20,30,70,.07);
+    --r:26px;--r-pill:999px;
+    --font:-apple-system,"SF Pro Display","SF Pro Text",system-ui,"Inter","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{font-family:var(--font);color:var(--ink);background:#dfe6f5;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  .wall{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
+     radial-gradient(120% 120% at 100% 0%,#cfe0ff 0%,transparent 55%),
+     radial-gradient(120% 120% at 0% 100%,#ffe3f1 0%,transparent 55%),
+     linear-gradient(160deg,#eaf0ff 0%,#f4ecff 45%,#e9fbff 100%);}
+  .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.75;mix-blend-mode:multiply;animation:drift 24s ease-in-out infinite;}
+  .b1{width:560px;height:560px;left:-100px;top:-140px;background:#6aa8ff;}
+  .b2{width:500px;height:500px;right:-80px;top:-60px;background:#b388ff;animation-delay:-7s;}
+  .b3{width:540px;height:540px;left:35%;bottom:-200px;background:#5be0c6;animation-delay:-13s;}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,30px) scale(1.07);}}
+
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 26px 70px;}
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:34px;}
+  .logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#2a7bff,#16d6c8);box-shadow:0 6px 18px rgba(42,123,255,.45);}
+  .top h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;}
+  .top .tag{font-size:13px;font-weight:600;color:var(--ink-soft);background:rgba(255,255,255,.5);padding:5px 12px;border-radius:var(--r-pill);border:1px solid var(--stroke-soft);}
+  .top .count{margin-left:auto;font-size:13px;color:var(--ink-soft);font-weight:600;}
+
+  .lead{font-size:15px;color:var(--ink-soft);max-width:620px;margin:-18px 0 30px;line-height:1.55;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px;}
+  .card{
+    display:flex;flex-direction:column;text-decoration:none;color:inherit;overflow:hidden;
+    background:var(--glass);backdrop-filter:blur(26px) saturate(185%);-webkit-backdrop-filter:blur(26px) saturate(185%);
+    border:1px solid var(--stroke);border-radius:var(--r);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.75);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 22px 54px rgba(20,30,70,.22),inset 0 1px 0 rgba(255,255,255,.8);}
+  .thumb{position:relative;height:208px;overflow:hidden;border-bottom:1px solid var(--stroke-soft);background:#eef2fb;}
+  .thumb iframe{position:absolute;top:0;left:0;width:1280px;height:1000px;border:0;transform:scale(.31);transform-origin:top left;pointer-events:none;}
+  .thumb .veil{position:absolute;inset:0;}
+  .badge{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;letter-spacing:.02em;color:#0f9d6b;background:rgba(255,255,255,.82);padding:5px 11px;border-radius:var(--r-pill);box-shadow:0 3px 10px rgba(20,30,70,.12);}
+  .meta{padding:18px 20px 20px;display:flex;flex-direction:column;gap:7px;flex:1;}
+  .meta .t{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+  .meta .d{font-size:13.5px;color:var(--ink-soft);line-height:1.5;flex:1;}
+  .meta .foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .meta .date{font-size:12px;color:var(--muted);font-weight:600;}
+  .open{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#2a7bff;}
+  .open svg{width:14px;height:14px;}
+
+  footer{margin-top:46px;text-align:center;font-size:12.5px;color:var(--muted);}
+</style>
+</head>
+<body>
+  <div class="wall"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+  <div class="wrap">
+    <div class="top">
+      <span class="logo"></span>
+      <h1>DeusFin · Макеты</h1>
+      <span class="tag">design previews</span>
+      <span class="count" id="count"></span>
+    </div>
+    <p class="lead">Витрина дизайн-макетов продукта. Открой любой — это рабочий прототип в браузере, можно показывать команде и заказчику. Данные на макетах демонстрационные.</p>
+
+    <div class="grid" id="grid">
+      <!-- КАРТОЧКИ: чтобы добавить макет — положи html в /mockups и добавь сюда один <a class="card">. -->
+      <a class="card" href="mockups/01-dashboard-liquid-glass.html" target="_blank" rel="noopener">
+        <div class="thumb">
+          <span class="badge">● iOS 26 · Liquid Glass</span>
+          <iframe src="mockups/01-dashboard-liquid-glass.html" loading="lazy" tabindex="-1" scrolling="no" aria-hidden="true"></iframe>
+          <span class="veil"></span>
+        </div>
+        <div class="meta">
+          <div class="t">Дашборд «Обзор»</div>
+          <div class="d">Главный экран в эстетике iOS 26: матовое стекло, bento-сетка, KPI со спарклайнами, денежный поток, структура расходов, платёжный календарь.</div>
+          <div class="foot">
+            <span class="date">Июнь 2026</span>
+            <span class="open">Открыть
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M9 7h8v8"/></svg>
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <footer>DeusFin — внутренняя витрина макетов · обновляется по мере появления новых экранов</footer>
+  </div>
+  <script>
+    var n = document.querySelectorAll('#grid .card').length;
+    document.getElementById('count').textContent = n + (n===1?' макет':' макета');
+  </script>
+</body>
+</html>

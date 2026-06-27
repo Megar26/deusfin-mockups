@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin — Sci-Fi Financial Terminal</title>
+<style>
+  :root{
+    --bg:#020604; --bg2:#04110a;
+    --grn:#35ff9e; --grn2:#1f8f5b; --grndim:#0f5836;
+    --amb:#ffb24d; --red:#ff5a5a; --blu:#5aa6ff;
+    --line:rgba(53,255,158,.30); --line2:rgba(53,255,158,.55);
+    --mono:"JetBrains Mono","SF Mono","Consolas",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--mono);background:radial-gradient(120% 100% at 50% 0%,#04140c,#010402 70%);color:var(--grn);-webkit-font-smoothing:antialiased;text-shadow:0 0 4px rgba(53,255,158,.35);}
+  /* CRT scanlines + vignette */
+  body::before{content:"";position:fixed;inset:0;z-index:50;pointer-events:none;background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px,rgba(0,0,0,.22) 2px 3px);mix-blend-mode:multiply;opacity:.6;animation:flick 4s infinite steps(60);}
+  body::after{content:"";position:fixed;inset:0;z-index:49;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.55));}
+  @keyframes flick{0%,97%,100%{opacity:.6}98%{opacity:.45}}
+
+  .wrap{max-width:1320px;margin:0 auto;padding:16px;}
+  .panel{border:1px solid var(--line);border-radius:4px;background:linear-gradient(180deg,rgba(11,40,26,.35),rgba(2,8,5,.55));position:relative;}
+  .ttl{font-size:11px;letter-spacing:.18em;color:var(--grn);padding:7px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;text-transform:uppercase;}
+  .ttl::before{content:"[==";color:var(--grn2);} .ttl::after{content:"==]";color:var(--grn2);margin-left:auto;}
+  .pad{padding:14px;}
+
+  /* header */
+  .head{display:flex;align-items:center;gap:16px;margin-bottom:14px;border:1px solid var(--line);border-radius:4px;padding:12px 16px;background:linear-gradient(180deg,rgba(11,40,26,.4),transparent);}
+  .hex{width:46px;height:46px;flex:none;display:grid;place-items:center;border:1px solid var(--line2);clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);font-weight:800;font-size:15px;color:var(--grn);background:rgba(53,255,158,.06);}
+  .brand .b1{font-size:18px;letter-spacing:.14em;font-weight:700;}
+  .brand .b1 .br{color:var(--grn2);}
+  .brand .b2{font-size:11px;letter-spacing:.2em;color:var(--grn2);margin-top:3px;}
+  .brand .b3{font-size:9px;letter-spacing:.34em;color:var(--grndim);margin-top:2px;}
+  .hstat{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .nominal{font-size:10px;letter-spacing:.14em;color:var(--amb);border:1px solid rgba(255,178,77,.5);padding:6px 12px;border-radius:3px;text-shadow:0 0 5px rgba(255,178,77,.5);}
+  .nominal .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amb);margin-right:7px;box-shadow:0 0 6px var(--amb);animation:blink 1.4s infinite;}
+  @keyframes blink{50%{opacity:.3}}
+  .clock{text-align:right;} .clock .c1{font-size:17px;letter-spacing:.1em;} .clock .c2{font-size:9px;letter-spacing:.2em;color:var(--grn2);}
+
+  .grid{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;}
+  .rows{display:flex;flex-direction:column;gap:14px;}
+
+  /* nav list */
+  .navrow{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.12em;}
+  .navrow:last-child{border-bottom:0;}
+  .navrow .sd{width:8px;height:8px;border-radius:50%;box-shadow:0 0 7px currentColor;}
+  .sg{color:var(--grn);} .sa{color:var(--amb);} .sb{color:var(--blu);} .sr{color:var(--red);}
+
+  /* stat row */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .stat{border:1px solid var(--line);border-radius:4px;padding:13px 15px;background:linear-gradient(180deg,rgba(11,40,26,.3),transparent);}
+  .stat.warn{border-color:rgba(255,178,77,.55);} .stat.crit{border-color:rgba(255,90,90,.6);}
+  .stat .l{font-size:10px;letter-spacing:.14em;color:var(--grn2);}
+  .stat .v{font-size:30px;font-weight:700;letter-spacing:.04em;margin:6px 0 2px;}
+  .stat.warn .v{color:var(--amb);text-shadow:0 0 6px rgba(255,178,77,.5);}
+  .stat.crit .v{color:var(--red);text-shadow:0 0 6px rgba(255,90,90,.5);}
+  .stat .s{font-size:10px;letter-spacing:.16em;color:var(--grn2);}
+  .stat.warn .s{color:var(--amb);} .stat.crit .s{color:var(--red);}
+
+  .two{display:grid;grid-template-columns:1fr 1.55fr;gap:14px;}
+  /* system modules */
+  .mods{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .mod{border:1px solid var(--line);border-radius:4px;padding:16px 8px;text-align:center;}
+  .mod . mi{height:22px;} .mod svg{width:24px;height:24px;margin-bottom:8px;}
+  .mod .mt{font-size:10px;letter-spacing:.12em;color:var(--grn2);}
+  .mod .ms{font-size:12px;letter-spacing:.12em;margin-top:3px;}
+
+  /* resource bars */
+  .bar{margin-bottom:13px;}
+  .bar:last-child{margin-bottom:0;}
+  .bar .bl{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.12em;color:var(--grn2);margin-bottom:5px;}
+  .bar .bl b{color:var(--grn);}
+  .track{height:14px;border:1px solid var(--line);border-radius:2px;padding:2px;}
+  .fill{height:100%;border-radius:1px;background:repeating-linear-gradient(90deg,currentColor 0 7px,transparent 7px 9px);}
+  .fg{color:var(--grn);} .fa{color:var(--amb);} .fr{color:var(--red);}
+
+  /* scanner */
+  .scan{display:grid;grid-template-columns:1.7fr 1fr;gap:0;}
+  .scanbox{border-right:1px solid var(--line);padding:12px;}
+  .scanttl{font-size:10px;letter-spacing:.14em;color:var(--grn2);margin-bottom:8px;}
+  .diag{padding:12px 14px;}
+  .diag .dr{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.1em;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .diag .dr:last-child{border-bottom:0;}
+  .diag .dr .dl{color:var(--grn2);} .diag .dr .dv{color:var(--grn);}
+  .scanfoot{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:9px;text-align:center;}
+  .scanfoot .sf .n{font-size:15px;} .scanfoot .sf .k{font-size:9px;letter-spacing:.14em;color:var(--grn2);}
+
+  /* emergency */
+  .ebtns{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .ebtn{border:1px solid var(--line);border-radius:4px;padding:15px;text-align:center;font-size:11px;letter-spacing:.12em;line-height:1.5;cursor:pointer;background:rgba(11,40,26,.2);}
+  .ebtn b{display:block;font-size:12px;}
+  .ebtn.r{border-color:rgba(255,90,90,.6);color:var(--red);text-shadow:0 0 5px rgba(255,90,90,.4);}
+  .ebtn.a{border-color:rgba(255,178,77,.6);color:var(--amb);}
+  .ebtn.b{border-color:rgba(90,166,255,.6);color:var(--blu);}
+  .ebtn.g{border-color:var(--line2);color:var(--grn);}
+
+  @media(max-width:980px){.grid{grid-template-columns:1fr;}.stats{grid-template-columns:repeat(2,1fr);}.two,.scan{grid-template-columns:1fr;}.mods{grid-template-columns:repeat(3,1fr);}.ebtns{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="hex">DF</div>
+    <div class="brand">
+      <div class="b1">DEUSFIN CORP <span class="br">//</span> ФИНАНСОВЫЙ ТЕРМИНАЛ</div>
+      <div class="b2">УПРАВЛЕНЧЕСКИЙ УЧЁТ :: TENANT CLEANDORF</div>
+      <div class="b3">BUILDING BETTER NUMBERS</div>
+    </div>
+    <div class="hstat">
+      <div class="nominal"><span class="dot"></span>ВНИМАНИЕ: КАССОВЫЙ РАЗРЫВ</div>
+      <div class="clock"><div class="c1">16:43:24</div><div class="c2">MSK · ИЮНЬ 2026</div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- NAV -->
+    <div class="panel">
+      <div class="ttl">Навигационный терминал</div>
+      <div>
+        <div class="navrow"><span>ДДС</span><span class="sd sg"></span></div>
+        <div class="navrow"><span>ОПиУ</span><span class="sd sa"></span></div>
+        <div class="navrow"><span>БАЛАНС</span><span class="sd sg"></span></div>
+        <div class="navrow"><span>ПЛАТЁЖНЫЙ КАЛЕНДАРЬ</span><span class="sd sb"></span></div>
+        <div class="navrow"><span>ДЕБИТОРКА</span><span class="sd sg"></span></div>
+        <div class="navrow"><span>НАЛОГИ УСН</span><span class="sd sr"></span></div>
+      </div>
+    </div>
+
+    <div class="rows">
+      <!-- STATS -->
+      <div class="stats">
+        <div class="stat"><div class="l">ДЕНЕЖНЫЙ ПОТОК</div><div class="v">98%</div><div class="s">В НОРМЕ</div></div>
+        <div class="stat warn"><div class="l">ЛИКВИДНОСТЬ</div><div class="v">87%</div><div class="s">ВНИМАНИЕ</div></div>
+        <div class="stat"><div class="l">ИНТЕГРАЦИИ</div><div class="v">100%</div><div class="s">АКТИВНЫ</div></div>
+        <div class="stat crit"><div class="l">КАССОВЫЙ РЕЗЕРВ</div><div class="v">72%</div><div class="s">КРИТИЧНО</div></div>
+      </div>
+
+      <div class="two">
+        <!-- system modules -->
+        <div class="panel">
+          <div class="ttl">Статус систем</div>
+          <div class="pad mods">
+            <div class="mod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg><div class="mt">ОТЧЁТЫ</div><div class="ms">В НОРМЕ</div></div>
+            <div class="mod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><div class="mt" style="color:var(--grn2)">БИЛЛИНГ</div><div class="ms">АКТИВЕН</div></div>
+            <div class="mod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--amb)"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/></svg><div class="mt" style="color:var(--grn2)">РЕЗЕРВ</div><div class="ms" style="color:var(--amb)">ОЖИДАНИЕ</div></div>
+          </div>
+        </div>
+        <!-- resource monitor -->
+        <div class="panel">
+          <div class="ttl">Монитор ресурсов</div>
+          <div class="pad">
+            <div class="bar"><div class="bl"><span>ВЫРУЧКА</span><b>1 045 230 ₽</b></div><div class="track"><div class="fill fg" style="width:88%"></div></div></div>
+            <div class="bar"><div class="bl"><span>РАСХОДЫ</span><b>668 230 ₽</b></div><div class="track"><div class="fill fa" style="width:64%"></div></div></div>
+            <div class="bar"><div class="bl"><span>НАЛОГИ К УПЛАТЕ</span><b>88 700 ₽</b></div><div class="track"><div class="fill fg" style="width:34%"></div></div></div>
+            <div class="bar"><div class="bl"><span>КАССОВЫЙ РАЗРЫВ 15.06</span><b style="color:var(--red)">−90 000 ₽</b></div><div class="track"><div class="fill fr" style="width:21%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- scanner -->
+      <div class="panel">
+        <div class="ttl">Внешний сканер · денежный поток</div>
+        <div class="scan">
+          <div class="scanbox">
+            <div class="scanttl">СКАН ОПЕРАЦИЙ · 30 ДНЕЙ</div>
+            <svg viewBox="0 0 560 300" width="100%" style="display:block">
+              <defs>
+                <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35ff9e" stop-opacity=".4"/><stop offset="1" stop-color="#35ff9e" stop-opacity="0"/></linearGradient>
+                <pattern id="gd" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="rgba(53,255,158,.12)" stroke-width="1"/></pattern>
+              </defs>
+              <rect x="0" y="0" width="560" height="300" fill="url(#gd)"/>
+              <g fill="#35ff9e" opacity=".5">
+                <circle cx="60" cy="200" r="1.3"/><circle cx="120" cy="150" r="1.3"/><circle cx="180" cy="170" r="1.3"/><circle cx="240" cy="110" r="1.3"/><circle cx="300" cy="130" r="1.3"/><circle cx="360" cy="90" r="1.3"/><circle cx="420" cy="120" r="1.3"/><circle cx="480" cy="70" r="1.3"/><circle cx="90" cy="240" r="1"/><circle cx="330" cy="60" r="1"/><circle cx="450" cy="190" r="1"/><circle cx="200" cy="50" r="1"/>
+              </g>
+              <path d="M30,210 L110,180 L190,196 L270,140 L350,158 L430,108 L530,132 L530,280 L30,280 Z" fill="url(#sg)"/>
+              <polyline fill="none" stroke="#35ff9e" stroke-width="2.4" points="30,210 110,180 190,196 270,140 350,158 430,108 530,132" style="filter:drop-shadow(0 0 5px rgba(53,255,158,.8))"/>
+              <g fill="#04110a" stroke="#35ff9e" stroke-width="2"><circle cx="270" cy="140" r="3.5"/><circle cx="430" cy="108" r="3.5"/><circle cx="530" cy="132" r="4"/></g>
+            </svg>
+          </div>
+          <div>
+            <div class="diag">
+              <div class="dr"><span class="dl">КОНТРАГЕНТЫ</span><span class="dv">312 АКТИВ.</span></div>
+              <div class="dr"><span class="dl">СЧЕТА</span><span class="dv">8 ШТ</span></div>
+              <div class="dr"><span class="dl">ВЫРУЧКА МЕС.</span><span class="dv">1.04 МЛН ₽</span></div>
+              <div class="dr"><span class="dl">ЧИСТАЯ МАРЖА</span><span class="dv">36.1%</span></div>
+              <div class="dr"><span class="dl">ETA ЗАКРЫТИЕ МЕС.</span><span class="dv">3 ДНЯ</span></div>
+            </div>
+            <div class="scanfoot">
+              <div class="sf"><div class="n">1 234</div><div class="k">ОПЕРАЦИЙ</div></div>
+              <div class="sf"><div class="n" style="color:var(--red)">1</div><div class="k">РАЗРЫВ</div></div>
+              <div class="sf"><div class="n">30Д</div><div class="k">ГОРИЗОНТ</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- emergency -->
+      <div class="panel">
+        <div class="ttl">Действия / протоколы</div>
+        <div class="pad ebtns">
+          <div class="ebtn g">ЗАКРЫТЬ<b>МЕСЯЦ</b></div>
+          <div class="ebtn a">ПЛАТЁЖНЫЙ<b>КАЛЕНДАРЬ</b></div>
+          <div class="ebtn r">УСТРАНИТЬ<b>РАЗРЫВ</b></div>
+          <div class="ebtn b">ЭКСПОРТ<b>ДАННЫХ</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

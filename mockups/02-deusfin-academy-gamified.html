@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin Академия — Gamified EdTech (по мотивам ContraQuest)</title>
+<style>
+  :root{
+    --ink:#2b2350; --muted:#7c7aa6; --line:#ece9fb;
+    --indigo:#6d5ef0; --peri:#8ea2ff; --peri2:#aeb9f5; --violet:#8b5cf6;
+    --pink:#ff7eb6; --mint:#46cf9b; --amber:#ffb43d; --gold:#ffc14d;
+    --card:#ffffff; --r:22px;
+    --font:"Segoe UI Rounded","SF Pro Rounded",-apple-system,system-ui,"Inter",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(90% 80% at 12% 8%, #fff3e9 0%, transparent 55%),
+      radial-gradient(90% 80% at 92% 90%, #ffe6f3 0%, transparent 55%),
+      linear-gradient(150deg,#f3f0ff 0%,#eef3ff 50%,#fdeef8 100%);
+    min-height:100vh;overflow-x:hidden;}
+  .stage{max-width:1180px;margin:0 auto;padding:34px 26px 60px;position:relative;}
+
+  .lead{margin-bottom:26px;}
+  .lead .ksuper{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--violet);text-transform:uppercase;}
+  .lead h1{margin:6px 0 0;font-size:32px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,var(--indigo),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lead p{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:560px;}
+
+  .phones{display:flex;gap:46px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+  .phone{width:300px;flex:none;border-radius:46px;background:#0c0a1f;padding:11px;box-shadow:0 40px 80px -30px rgba(90,70,180,.5),0 8px 24px rgba(90,70,180,.18);position:relative;}
+  .phone.tilt{transform:rotate(-2deg);} .phone.tilt2{transform:rotate(2deg);margin-top:34px;}
+  .screen{border-radius:36px;overflow:hidden;background:#f7f6ff;height:626px;position:relative;}
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#0c0a1f;border-radius:16px;z-index:9;}
+  .stbar{display:flex;justify-content:space-between;padding:13px 22px 0;font-size:12px;font-weight:700;color:var(--ink);}
+
+  /* gradient header */
+  .ghead{background:linear-gradient(160deg,var(--peri) 0%,#b7a6f7 60%,#c9b6f5 100%);padding:30px 20px 30px;border-radius:0 0 30px 30px;color:#fff;position:relative;overflow:hidden;}
+  .ghead::after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.18);}
+  .ghead .row{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .ava{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#fff,#ffe6f3);display:grid;place-items:center;font-size:22px;box-shadow:0 6px 16px rgba(0,0,0,.12);}
+  .hi{font-size:17px;font-weight:800;} .rank{font-size:12px;opacity:.92;margin-top:2px;}
+  .streak{margin-left:auto;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;}
+
+  .body{padding:16px;display:flex;flex-direction:column;gap:14px;}
+  .body.scroll{height:calc(626px - 0px);}
+
+  /* xp card overlapping */
+  .xp{background:var(--card);border-radius:20px;padding:15px 16px;box-shadow:0 12px 30px -12px rgba(90,70,180,.35);margin-top:-34px;position:relative;z-index:2;}
+  .xp .top{display:flex;align-items:center;justify-content:space-between;}
+  .lvl{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;}
+  .lvl .badge{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;display:grid;place-items:center;font-size:13px;box-shadow:0 5px 14px rgba(109,94,240,.45);}
+  .gems{font-size:13px;font-weight:800;color:var(--amber);}
+  .xpbar{height:11px;border-radius:999px;background:#ede9ff;margin:12px 0 6px;overflow:hidden;}
+  .xpbar i{display:block;height:100%;width:71%;border-radius:999px;background:linear-gradient(90deg,var(--indigo),var(--pink));}
+  .xpmeta{font-size:11.5px;color:var(--muted);font-weight:600;}
+
+  /* daily quest */
+  .quest{border-radius:20px;padding:16px;color:#fff;background:linear-gradient(135deg,var(--indigo),var(--pink));position:relative;overflow:hidden;box-shadow:0 14px 30px -14px rgba(255,126,182,.6);}
+  .quest::after{content:"";position:absolute;right:-20px;bottom:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.14);}
+  .quest .q1{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.9;}
+  .quest .q2{font-size:17px;font-weight:800;margin:5px 0 12px;}
+  .quest .qrow{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .qbar{flex:1;height:9px;border-radius:999px;background:rgba(255,255,255,.3);overflow:hidden;}
+  .qbar i{display:block;height:100%;width:33%;background:#fff;border-radius:999px;}
+  .qmeta{font-size:12px;font-weight:800;}
+  .play{width:42px;height:42px;border-radius:14px;background:#fff;color:var(--indigo);display:grid;place-items:center;flex:none;box-shadow:0 6px 14px rgba(0,0,0,.15);}
+  .play svg{width:18px;height:18px;}
+
+  .sectt{font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+  .sectt a{font-size:12px;color:var(--indigo);font-weight:700;}
+
+  /* pathway lessons */
+  .les{display:flex;align-items:center;gap:13px;background:var(--card);border-radius:18px;padding:13px;box-shadow:0 8px 22px -14px rgba(90,70,180,.3);}
+  .les .ic{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;flex:none;font-size:21px;color:#fff;}
+  .les .nm{font-size:14px;font-weight:800;}
+  .les .sb{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .les .pr{height:7px;border-radius:999px;background:#eef0fb;margin-top:8px;overflow:hidden;width:130px;}
+  .les .pr i{display:block;height:100%;border-radius:999px;}
+  .les .st{margin-left:auto;flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;}
+  .done{background:linear-gradient(135deg,var(--mint),#7ee0bb);}
+  .cur{background:linear-gradient(135deg,var(--peri),var(--indigo));}
+  .lock{background:#dcd9ef;}
+  .stdone{background:#e6f9f1;color:var(--mint);} .stcur{background:#ece9ff;color:var(--indigo);} .stlock{background:#f0eefb;color:#b3aed4;}
+
+  /* bottom nav */
+  .nav{position:absolute;left:14px;right:14px;bottom:14px;height:62px;background:#fff;border-radius:22px;box-shadow:0 10px 30px -10px rgba(90,70,180,.4);display:flex;justify-content:space-around;align-items:center;z-index:8;}
+  .nav .it{display:flex;flex-direction:column;align-items:center;gap:3px;color:#b3aed4;font-size:9.5px;font-weight:700;}
+  .nav .it svg{width:21px;height:21px;}
+  .nav .it.on{color:var(--indigo);}
+
+  /* phone B specifics */
+  .qzhead{background:linear-gradient(160deg,#b7a6f7,#d9a7e8);color:#fff;padding:26px 18px 22px;border-radius:0 0 30px 30px;}
+  .qzhead .bk{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.22);display:grid;place-items:center;margin-bottom:12px;}
+  .qzhead .bk svg{width:16px;height:16px;}
+  .qzhead h2{margin:0;font-size:20px;font-weight:800;}
+  .qzhead .u{font-size:12px;opacity:.92;margin-top:3px;}
+  .stages{display:flex;align-items:center;justify-content:space-between;padding:6px 4px;}
+  .stg{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;}
+  .stg::before{content:"";position:absolute;top:17px;left:-50%;width:100%;height:3px;background:#e7e3fa;z-index:0;}
+  .stg:first-child::before{display:none;}
+  .stg.ok::before{background:var(--mint);}
+  .stg .c{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;z-index:1;}
+  .stg.ok .c{background:linear-gradient(135deg,var(--mint),#7ee0bb);color:#fff;}
+  .stg.now .c{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;box-shadow:0 0 0 5px #ece9ff;}
+  .stg.lk .c{background:#e7e3fa;color:#b3aed4;}
+  .stg .t{font-size:9.5px;color:var(--muted);font-weight:700;}
+
+  .video{border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 8px 22px -14px rgba(90,70,180,.3);}
+  .thumb{height:120px;background:linear-gradient(135deg,#6d5ef0,#ff7eb6);position:relative;display:grid;place-items:center;}
+  .thumb .pl{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--indigo);}
+  .thumb .pl svg{width:20px;height:20px;}
+  .thumb .dur{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:7px;}
+  .vmeta{padding:12px 14px;} .vmeta .vt{font-size:14px;font-weight:800;} .vmeta .vs{font-size:11.5px;color:var(--muted);margin-top:3px;}
+
+  .reward{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#fff7e9,#fff);border:1px solid #ffe7bd;border-radius:18px;padding:14px;}
+  .reward .ri{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--amber));display:grid;place-items:center;color:#fff;font-size:20px;flex:none;}
+  .reward .rt{font-size:13.5px;font-weight:800;} .reward .rs{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .reward .rb{margin-left:auto;background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;font-size:12px;font-weight:800;padding:9px 16px;border-radius:999px;}
+
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .bdg{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .bdg .b{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:22px;color:#fff;}
+  .bdg .l{font-size:9px;color:var(--muted);font-weight:700;text-align:center;line-height:1.2;}
+  .bdg.off .b{background:#e7e3fa;color:#bdb8dd;} .bdg.off .l{color:#bdb8dd;}
+
+  /* floating decor */
+  .float{position:absolute;background:#fff;border-radius:16px;box-shadow:0 14px 34px -14px rgba(90,70,180,.45);padding:11px 14px;display:flex;align-items:center;gap:9px;font-weight:800;font-size:13px;z-index:5;}
+  .float .e{font-size:18px;}
+  .f1{top:120px;left:18px;color:var(--mint);}
+  .f2{bottom:120px;right:24px;color:var(--indigo);}
+  @media(max-width:760px){.float{display:none;}.phones{gap:24px;}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="lead">
+    <div class="ksuper">✦ Gamified EdTech</div>
+    <h1>DeusFin Академия — финансовый квест</h1>
+    <p>Обучение управленческому учёту как игра: уровни, XP, стрик-цепочки, ежедневные квесты и путь по темам — от основ ДДС до кассовых разрывов и налогов.</p>
+  </div>
+
+  <div class="float f1"><span class="e">🏅</span>Бейдж получен!</div>
+  <div class="float f2"><span class="e">⚡</span>+50 XP</div>
+
+  <div class="phones">
+    <!-- PHONE A -->
+    <div class="phone tilt">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="stbar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="ghead">
+          <div class="row">
+            <div class="ava">🦉</div>
+            <div><div class="hi">Привет, Дмитрий 👋</div><div class="rank">Финансовый ранг: Аналитик</div></div>
+            <div class="streak">🔥 12</div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="xp">
+            <div class="top">
+              <div class="lvl"><span class="badge">7</span>Уровень 7</div>
+              <div class="gems">⭐ 1 240</div>
+            </div>
+            <div class="xpbar"><i></i></div>
+            <div class="xpmeta">320 / 450 XP до Уровня 8</div>
+          </div>
+
+          <div class="quest">
+            <div class="q1">⚡ Квест дня</div>
+            <div class="q2">Внеси 3 операции в ДДС</div>
+            <div class="qrow">
+              <div class="qbar"><i></i></div>
+              <div class="qmeta">1/3 · +50 XP</div>
+              <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+            </div>
+          </div>
+
+          <div class="sectt">Твой путь <a>Все темы</a></div>
+
+          <div class="les">
+            <div class="ic done">💧</div>
+            <div><div class="nm">Основы ДДС</div><div class="sb">Денежный поток · 6 уроков</div><div class="pr"><i style="width:100%;background:var(--mint)"></i></div></div>
+            <div class="st stdone">✓</div>
+          </div>
+          <div class="les">
+            <div class="ic done">⚖️</div>
+            <div><div class="nm">Доходы и расходы</div><div class="sb">ОПиУ · 5 уроков</div><div class="pr"><i style="width:100%;background:var(--mint)"></i></div></div>
+            <div class="st stdone">✓</div>
+          </div>
+          <div class="les">
+            <div class="ic cur">📈</div>
+            <div><div class="nm">Маржа и прибыль</div><div class="sb">Юнит 3 из 5 · продолжить</div><div class="pr"><i style="width:60%;background:var(--indigo)"></i></div></div>
+            <div class="st stcur">▶</div>
+          </div>
+          <div class="les">
+            <div class="ic lock">🛟</div>
+            <div><div class="nm">Кассовый разрыв</div><div class="sb">Откроется на Уровне 8</div></div>
+            <div class="st stlock">🔒</div>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="it on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Главная</div>
+          <div class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Уроки</div>
+          <div class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 0 1-12 0z"/></svg>Рейтинг</div>
+          <div class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Профиль</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE B -->
+    <div class="phone tilt2">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="stbar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="qzhead">
+          <div class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg></div>
+          <h2>Маржа и прибыль</h2>
+          <div class="u">Юнит 3 из 5 · 60% пройдено</div>
+        </div>
+        <div class="body">
+          <div class="stages">
+            <div class="stg ok"><div class="c">✓</div><div class="t">Теория</div></div>
+            <div class="stg ok"><div class="c">✓</div><div class="t">Пример</div></div>
+            <div class="stg now"><div class="c">3</div><div class="t">Квиз</div></div>
+            <div class="stg lk"><div class="c">4</div><div class="t">Кейс</div></div>
+            <div class="stg lk"><div class="c">5</div><div class="t">Босс</div></div>
+          </div>
+
+          <div class="video">
+            <div class="thumb"><div class="pl"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div class="dur">4:12</div></div>
+            <div class="vmeta"><div class="vt">Как считать маржу бизнеса</div><div class="vs">Видео-урок · 4 мин · +30 XP</div></div>
+          </div>
+
+          <div class="reward">
+            <div class="ri">🎯</div>
+            <div><div class="rt">Квиз: 5 вопросов</div><div class="rs">Заработай до 80 XP и бейдж «Маржинальный»</div></div>
+            <div class="rb">Начать</div>
+          </div>
+
+          <div class="sectt">Достижения</div>
+          <div class="badges">
+            <div class="bdg"><div class="b" style="background:linear-gradient(135deg,var(--mint),#7ee0bb)">🚀</div><div class="l">Первая операция</div></div>
+            <div class="bdg"><div class="b" style="background:linear-gradient(135deg,var(--amber),var(--gold))">🔥</div><div class="l">7 дней подряд</div></div>
+            <div class="bdg"><div class="b" style="background:linear-gradient(135deg,var(--indigo),var(--violet))">📊</div><div class="l">Закрыл месяц</div></div>
+            <div class="bdg off"><div class="b">🛡️</div><div class="l">Без разрыва</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

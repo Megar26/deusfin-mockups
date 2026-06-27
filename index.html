@@ -141,13 +141,34 @@
           </div>
         </div>
       </a>
+
+      <a class="card" href="mockups/05-deusfin-neo-minimal.html" target="_blank" rel="noopener">
+        <div class="thumb">
+          <span class="badge">○ Neo-Minimal · Glass</span>
+          <iframe src="mockups/05-deusfin-neo-minimal.html" loading="lazy" tabindex="-1" scrolling="no" aria-hidden="true"></iframe>
+          <span class="veil"></span>
+        </div>
+        <div class="meta">
+          <div class="t">Светлый нео-минимал</div>
+          <div class="d">Чистый светлый дашборд с cyan→blue градиентом: KPI с круглыми иконками, быстрые действия, динамика выручки, собираемость оплат, градиентная карточка AI-инсайтов (по мотивам Proxima Living).</div>
+          <div class="foot">
+            <span class="date">Июнь 2026</span>
+            <span class="open">Открыть
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M9 7h8v8"/></svg>
+            </span>
+          </div>
+        </div>
+      </a>
     </div>
 
     <footer>DeusFin — внутренняя витрина макетов · обновляется по мере появления новых экранов</footer>
   </div>
   <script>
     var n = document.querySelectorAll('#grid .card').length;
-    document.getElementById('count').textContent = n + (n===1?' макет':' макета');
+    var m10 = n % 10, m100 = n % 100;
+    var word = (m10 === 1 && m100 !== 11) ? ' макет'
+      : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) ? ' макета' : ' макетов';
+    document.getElementById('count').textContent = n + word;
   </script>
 </body>
 </html>

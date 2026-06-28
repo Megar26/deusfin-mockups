@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin ERP — центр интеграций (по мотивам Krediy ERP)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --line:#ecedf1; --line2:#e3e5ea;
+    --ink:#1a1d24; --muted:#6b7280; --dim:#9ca3af;
+    --orange:#f97316; --orange2:#ea580c; --grad:linear-gradient(135deg,#fb923c,#ea580c);
+    --green:#16a34a; --red:#dc2626; --amber:#d97706; --blue:#3b82f6; --purple:#8b5cf6; --teal:#0d9488;
+    --r:14px; --pill:999px;
+    --font:"Inter","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  .app{display:grid;grid-template-columns:212px 1fr;min-height:100vh;}
+
+  /* sidebar */
+  .side{background:var(--card);border-right:1px solid var(--line);padding:16px 12px;overflow:auto;}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;padding:4px 8px 14px;}
+  .logo .mk{width:26px;height:26px;border-radius:8px;background:var(--grad);}
+  .seclab{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;padding:12px 10px 5px;}
+  .nav a{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;}
+  .nav a svg{width:16px;height:16px;flex:none;}
+  .nav a.on{background:var(--grad);color:#fff;box-shadow:0 8px 18px -8px rgba(234,88,12,.7);}
+  .nav a:not(.on):hover{background:#f5f6f8;color:var(--ink);}
+
+  /* main */
+  .main{min-width:0;}
+  .top{display:flex;align-items:center;gap:16px;padding:13px 24px;border-bottom:1px solid var(--line);background:var(--card);}
+  .search{flex:1;max-width:360px;display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--dim);font-size:13px;}
+  .search svg{width:15px;height:15px;}
+  .top .sp{flex:1;}
+  .bell{position:relative;color:var(--muted);} .bell svg{width:18px;height:18px;} .bell .b{position:absolute;top:-4px;right:-4px;background:var(--orange);color:#fff;font-size:9px;font-weight:800;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;}
+  .ava{width:30px;height:30px;border-radius:8px;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;}
+
+  .wrap{padding:20px 24px 40px;}
+  h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.02em;}
+  .sub{color:var(--muted);font-size:13px;margin:3px 0 16px;}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;}
+  .kpi .kt{display:flex;align-items:flex-start;justify-content:space-between;}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:600;}
+  .kpi .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;}
+  .kpi .ic svg{width:16px;height:16px;}
+  .kpi .val{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:11px 0 5px;font-variant-numeric:tabular-nums;}
+  .kpi .chg{font-size:11.5px;font-weight:700;}
+  .up{color:var(--green);} .dn{color:var(--red);}
+  .ic.o{background:#fff1e7;color:var(--orange);} .ic.b{background:#eaf1fe;color:var(--blue);} .ic.g{background:#e7f6ed;color:var(--green);} .ic.p{background:#f1ecfd;color:var(--purple);}
+
+  .layout{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:16px;}
+  .modhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .modhead .t{font-size:15px;font-weight:800;}
+  .modhead .mi{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line2);background:var(--card);padding:7px 13px;border-radius:9px;}
+  .mods{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .mod{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;}
+  .mod .mh{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .mod .mi2{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;}
+  .mod .mi2 svg{width:16px;height:16px;}
+  .mod .nm{font-size:13.5px;font-weight:800;}
+  .mod .st{margin-left:auto;font-size:10px;font-weight:800;padding:3px 9px;border-radius:var(--pill);display:flex;align-items:center;gap:5px;}
+  .st.act{color:var(--green);background:#e7f6ed;} .st.warn{color:var(--amber);background:#fdf3e3;}
+  .st .d{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .mod .ds{font-size:11px;color:var(--muted);margin:2px 0 10px;}
+  .mod .rw{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:7px 10px;border-radius:8px;background:#fff7f1;margin-top:6px;}
+  .mod .rw .rl{color:var(--muted);} .mod .rw .rv{font-weight:800;font-variant-numeric:tabular-nums;}
+  .mod .rw .rv small{font-weight:700;margin-left:5px;}
+
+  .rcol{display:flex;flex-direction:column;gap:16px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;}
+  .pt{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:12px;}
+  .pt svg{width:15px;height:15px;color:var(--orange);}
+  .hl{margin-bottom:11px;} .hl:last-child{margin-bottom:0;}
+  .hl .row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;} .hl .row .rl{color:var(--muted);} .hl .row .rv{font-weight:700;}
+  .bar{height:7px;border-radius:var(--pill);background:#f0f1f4;overflow:hidden;} .bar i{display:block;height:100%;border-radius:var(--pill);background:var(--grad);}
+  .alert{display:flex;align-items:flex-start;gap:9px;font-size:12px;padding:9px 0;border-top:1px solid var(--line);}
+  .alert:first-of-type{border-top:0;} .alert .d{width:8px;height:8px;border-radius:50%;margin-top:3px;flex:none;}
+  .alert .nm{font-weight:600;} .alert .ag{font-size:10.5px;color:var(--dim);margin-top:2px;}
+
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:0 8px 9px;}
+  td{padding:9px 8px;border-top:1px solid var(--line);}
+  .bdg{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:var(--pill);}
+  .bdg.done{color:var(--green);background:#e7f6ed;} .bdg.proc{color:var(--blue);background:#eaf1fe;} .bdg.ship{color:var(--purple);background:#f1ecfd;} .bdg.pend{color:var(--amber);background:#fdf3e3;}
+  .neg{color:var(--red);font-weight:700;} .pos{color:var(--green);font-weight:700;}
+  .feed{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-top:1px solid var(--line);}
+  .feed:first-of-type{border-top:0;} .feed .d{width:9px;height:9px;border-radius:50%;margin-top:4px;flex:none;}
+  .feed .nm{font-size:13px;font-weight:700;} .feed .ds{font-size:11px;color:var(--muted);margin-top:2px;} .feed .ag{font-size:10.5px;color:var(--dim);margin-top:3px;}
+  .feed .res{margin-left:auto;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:var(--pill);}
+  .res.ok{color:var(--green);background:#e7f6ed;} .res.err{color:var(--red);background:#fdeaea;}
+
+  @media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr);}.layout{grid-template-columns:1fr;}.mods{grid-template-columns:1fr;}.grid2{grid-template-columns:1fr;}.side{display:none;}.app{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><span class="mk"></span>DeusFin ERP</div>
+    <div class="seclab">Обзор</div>
+    <nav class="nav">
+      <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Дашборд</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M9 15l3-4 3 2 4-6"/></svg>Аналитика</a>
+    </nav>
+    <div class="seclab">Учёт</div>
+    <nav class="nav">
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg>ДДС</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M9 15l3-4 3 2 4-6"/></svg>ОПиУ</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-4 7 4v13"/></svg>Баланс</a>
+    </nav>
+    <div class="seclab">Деньги</div>
+    <nav class="nav">
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Платёжный календарь</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Дебиторка</a>
+    </nav>
+    <div class="seclab">Интеграции</div>
+    <nav class="nav">
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>Банки</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Bitrix24</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>ЮKassa</a>
+    </nav>
+    <div class="seclab">Прочее</div>
+    <nav class="nav">
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/></svg>Контрагенты</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.9 2 2 0 1 1 3 10h.1A1.6 1.6 0 0 0 4.6 7a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.6 1.6 0 0 0-.3 1.8z"/></svg>Настройки</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Поиск по операциям, контрагентам…</div>
+      <div class="sp"></div>
+      <span class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg><span class="b">3</span></span>
+      <span class="ava">ДС</span>
+    </header>
+
+    <div class="wrap">
+      <h1>Обзор</h1>
+      <div class="sub">Все финансовые операции и интеграции в одном месте.</div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kt"><span class="lab">Выручка</span><span class="ic o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></div><div class="val">1 245 630 ₽</div><div class="chg up">▲ +12,5% м/м</div></div>
+        <div class="kpi"><div class="kt"><span class="lab">Операций</span><span class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg></span></div><div class="val">1 247</div><div class="chg up">▲ +8,2% м/м</div></div>
+        <div class="kpi"><div class="kt"><span class="lab">Дебиторка</span><span class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-4 7 4v13"/></svg></span></div><div class="val">286 420 ₽</div><div class="chg dn">▼ −2,1% м/м</div></div>
+        <div class="kpi"><div class="kt"><span class="lab">Контрагенты</span><span class="ic p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6"/></svg></span></div><div class="val">312</div><div class="chg up">▲ +15,3% м/м</div></div>
+      </div>
+
+      <div class="layout">
+        <div>
+          <div class="modhead"><span class="t">Модули и интеграции</span><span class="mi">Управление интеграциями</span></div>
+          <div class="mods">
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg></span><span class="nm">Банк-интеграции</span><span class="st act"><span class="d"></span>Активно</span></div><div class="ds">Сбер, Альфа, Тинькофф · автоимпорт выписок</div><div class="rw"><span class="rl">Импортировано</span><span class="rv">1 156<small class="up">+5%</small></span></div><div class="rw"><span class="rl">В обработке</span><span class="rv">23<small class="up">+3%</small></span></div><div class="rw"><span class="rl">Ошибки разбора</span><span class="rv">2<small class="dn">−1</small></span></div></div>
+
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></span><span class="nm">Bitrix24</span><span class="st act"><span class="d"></span>Активно</span></div><div class="ds">Сделки, контакты, источник данных</div><div class="rw"><span class="rl">Сделки</span><span class="rv">156<small class="up">+12%</small></span></div><div class="rw"><span class="rl">Контакты</span><span class="rv">89<small class="up">+8%</small></span></div><div class="rw"><span class="rl">Синхронизация</span><span class="rv">234<small class="up">+15%</small></span></div></div>
+
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M8 3h7l5 5v13H8z"/></svg></span><span class="nm">Учёт · ДДС / ОПиУ</span><span class="st act"><span class="d"></span>Активно</span></div><div class="ds">Проводки, отчёты, начисления</div><div class="rw"><span class="rl">Проводки</span><span class="rv">1 247<small class="up">+5%</small></span></div><div class="rw"><span class="rl">Начисления</span><span class="rv">1 156<small class="up">+2%</small></span></div><div class="rw"><span class="rl">Отчёты</span><span class="rv">23<small class="up">+3%</small></span></div></div>
+
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span><span class="nm">Платёжный календарь</span><span class="st warn"><span class="d"></span>Внимание</span></div><div class="ds">Плановые платежи, кассовые разрывы</div><div class="rw"><span class="rl">Запланировано</span><span class="rv">134<small class="up">+8%</small></span></div><div class="rw"><span class="rl">Просрочено</span><span class="rv">12<small class="dn">+25%</small></span></div><div class="rw"><span class="rl">Разрывы</span><span class="rv">1<small class="dn">+1</small></span></div></div>
+
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--purple)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="nm">ЮKassa · биллинг</span><span class="st act"><span class="d"></span>Активно</span></div><div class="ds">Платежи, подписки, автопродление</div><div class="rw"><span class="rl">Платежи</span><span class="rv">28<small class="up">+12%</small></span></div><div class="rw"><span class="rl">Подписки</span><span class="rv">145<small class="up">+12%</small></span></div><div class="rw"><span class="rl">Возвраты</span><span class="rv">2<small class="dn">−8%</small></span></div></div>
+
+            <div class="mod"><div class="mh"><span class="mi2" style="background:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M3 12a9 9 0 1 0 3-6.7"/></svg></span><span class="nm">Налоги · УСН</span><span class="st act"><span class="d"></span>Активно</span></div><div class="ds">Расчёт, начисления, сроки уплаты</div><div class="rw"><span class="rl">Начислено</span><span class="rv">88,7к ₽<small class="up">+6%</small></span></div><div class="rw"><span class="rl">К уплате</span><span class="rv">88,7к ₽</span></div><div class="rw"><span class="rl">Срок</span><span class="rv">25.06</span></div></div>
+          </div>
+        </div>
+
+        <div class="rcol">
+          <div class="panel">
+            <div class="pt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>Статус систем</div>
+            <div class="hl"><div class="row"><span class="rl">API DeusFin</span><span class="rv">120 мс</span></div><div class="bar"><i style="width:90%"></i></div></div>
+            <div class="hl"><div class="row"><span class="rl">База данных</span><span class="rv">98,9%</span></div><div class="bar"><i style="width:99%"></i></div></div>
+            <div class="hl"><div class="row"><span class="rl">Синхр. банков</span><span class="rv">67%</span></div><div class="bar"><i style="width:67%"></i></div></div>
+            <div class="hl"><div class="row"><span class="rl">ЮKassa вебхуки</span><span class="rv">99,2%</span></div><div class="bar"><i style="width:99%"></i></div></div>
+          </div>
+          <div class="panel">
+            <div class="pt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Свежие алерты</div>
+            <div class="alert"><span class="d" style="background:var(--amber)"></span><div><div class="nm">Дебиторка «Контур» > 60 дней</div><div class="ag">2 часа назад</div></div></div>
+            <div class="alert"><span class="d" style="background:var(--blue)"></span><div><div class="nm">Резервная копия выполнена</div><div class="ag">6 часов назад</div></div></div>
+            <div class="alert"><span class="d" style="background:var(--green)"></span><div><div class="nm">Все интеграции в норме</div><div class="ag">1 день назад</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="pt" style="justify-content:space-between"><span>Последние операции</span><span style="font-size:11.5px;color:var(--orange);font-weight:700">Все</span></div>
+          <table>
+            <thead><tr><th>№</th><th>Контрагент</th><th>Сумма</th><th>Статус</th><th>Канал</th><th>Дата</th></tr></thead>
+            <tbody>
+              <tr><td>TXN-001</td><td>ООО «Сбер»</td><td class="pos">+140 000 ₽</td><td><span class="bdg done">Проведено</span></td><td style="color:var(--muted)">Банк</td><td style="color:var(--muted)">15.06 14:32</td></tr>
+              <tr><td>TXN-002</td><td>ООО «Ритейл»</td><td class="pos">+86 500 ₽</td><td><span class="bdg proc">В обработке</span></td><td style="color:var(--muted)">B24</td><td style="color:var(--muted)">15.06 13:45</td></tr>
+              <tr><td>TXN-003</td><td>ИП Орлов</td><td class="pos">+21 500 ₽</td><td><span class="bdg ship">Отгрузка</span></td><td style="color:var(--muted)">Банк</td><td style="color:var(--muted)">14.06 16:20</td></tr>
+              <tr><td>TXN-004</td><td>Аренда офиса</td><td class="neg">−48 000 ₽</td><td><span class="bdg pend">Ожидает</span></td><td style="color:var(--muted)">Календарь</td><td style="color:var(--muted)">14.06 11:15</td></tr>
+              <tr><td>TXN-005</td><td>ООО «Старт»</td><td class="pos">+158 000 ₽</td><td><span class="bdg done">Проведено</span></td><td style="color:var(--muted)">Банк</td><td style="color:var(--muted)">13.06 09:30</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="pt" style="justify-content:space-between"><span>Активность интеграций</span><span style="font-size:11.5px;color:var(--muted);font-weight:600">Монитор</span></div>
+          <div class="feed"><span class="d" style="background:var(--green)"></span><div><div class="nm">Импорт выписки · Сбер</div><div class="ds">312 строк · разнесено по статьям</div><div class="ag">5 мин назад</div></div><span class="res ok">OK</span></div>
+          <div class="feed"><span class="d" style="background:var(--blue)"></span><div><div class="nm">Синхронизация Bitrix24</div><div class="ds">245 сделок обновлено</div><div class="ag">12 мин назад</div></div><span class="res ok">OK</span></div>
+          <div class="feed"><span class="d" style="background:var(--red)"></span><div><div class="nm">ЮKassa · платёж</div><div class="ds">Автосписание #TXN-5678 отклонено</div><div class="ag">23 мин назад</div></div><span class="res err">Ошибка</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

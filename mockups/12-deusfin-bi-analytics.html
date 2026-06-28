@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin — BI-аналитика (по мотивам Power BI Healthcare Dashboard)</title>
+<style>
+  :root{
+    --bg:#f3f4f6; --card:#ffffff; --line:#e9ebee; --line2:#e0e3e7;
+    --ink:#1f2430; --muted:#6b7280; --dim:#9aa1ac;
+    --coral:#ef5350; --coral2:#f87171; --green:#22c55e; --blue:#3b82f6; --amber:#f59e0b; --purple:#8b5cf6; --grey:#cdd3da;
+    --r:12px; --pill:999px; --font:"Segoe UI","Inter",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  .app{display:grid;grid-template-columns:48px 1fr;min-height:100vh;}
+  .side{background:var(--card);border-right:1px solid var(--line);padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:18px;}
+  .side .ic{color:var(--dim);} .side .ic.on{color:var(--coral);} .side .ic svg{width:20px;height:20px;}
+
+  .wrap{padding:22px 28px 36px;min-width:0;}
+  .head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+  h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px;}
+  .org{text-align:right;border-left:3px solid var(--coral);padding-left:14px;}
+  .org .o1{font-size:15px;font-weight:800;letter-spacing:.04em;} .org .o2{font-size:11px;color:var(--muted);letter-spacing:.1em;}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:0 6px 18px -14px rgba(30,40,60,.4);position:relative;}
+  .kpi .lab{font-size:12px;color:var(--muted);}
+  .kpi .val{font-size:28px;font-weight:800;margin:6px 0 3px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .kpi .cap{font-size:11.5px;color:var(--dim);}
+  .kpi .chg{font-size:11.5px;font-weight:700;margin-top:8px;display:flex;align-items:center;gap:5px;}
+  .up{color:var(--green);} .dn{color:var(--coral);}
+  .kpi .ico{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;}
+  .kpi .ico svg{width:17px;height:17px;}
+
+  .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:0 6px 18px -16px rgba(30,40,60,.4);}
+  .pt{font-size:14px;font-weight:700;margin-bottom:12px;}
+
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:8px;font-size:12px;color:var(--muted);}
+  .legend span{display:flex;align-items:center;gap:8px;} .legend i{width:9px;height:9px;border-radius:50%;}
+
+  .hbar{margin-bottom:14px;} .hbar:last-child{margin-bottom:0;}
+  .hbar .bl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;} .hbar .bl .n{font-weight:600;} .hbar .bl .v{color:var(--muted);font-variant-numeric:tabular-nums;}
+  .track{height:8px;border-radius:var(--pill);background:#eef0f3;overflow:hidden;} .track i{display:block;height:100%;border-radius:var(--pill);}
+
+  .feed{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid var(--line);}
+  .feed:first-of-type{border-top:0;} .feed .d{width:9px;height:9px;border-radius:50%;margin-top:4px;flex:none;}
+  .feed .nm{font-size:13px;font-weight:600;} .feed .ds{font-size:11.5px;color:var(--muted);margin-top:2px;} .feed .ag{font-size:10.5px;color:var(--dim);margin-top:3px;}
+
+  @media(max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr);}.row3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <span class="ic on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></span>
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/></svg></span>
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.4-7-11a7 7 0 0 1 14 0c0 4.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M9 15l3-4 3 2 4-6"/></svg></span>
+  </aside>
+
+  <div class="wrap">
+    <div class="head">
+      <div><h1>Финансовая аналитика</h1><div class="sub">BI-обзор показателей бизнеса в реальном времени.</div></div>
+      <div class="org"><div class="o1">DeusFin BI</div><div class="o2">УПРАВЛЕНЧЕСКИЙ УЧЁТ</div></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span class="ico" style="background:#fdecec;color:var(--coral)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><div class="lab">Оборот</div><div class="val">9,03 М ₽</div><div class="cap">за полугодие</div><div class="chg up">▲ +5,2% к пр. месяцу</div></div>
+      <div class="kpi"><span class="ico" style="background:#e8f7ee;color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M8 3h7l5 5v13H8z"/></svg></span><div class="lab">Открытых счетов</div><div class="val">47</div><div class="cap">по всем юрлицам</div><div class="chg up">▲ 12 закрыто за неделю</div></div>
+      <div class="kpi"><span class="ico" style="background:#fef3e2;color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></span><div class="lab">Исполнение бюджета</div><div class="val">86%</div><div class="cap">план/факт</div><div class="chg up">▲ +2,1% к кварталу</div></div>
+      <div class="kpi"><span class="ico" style="background:#f1ecfd;color:var(--purple)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div class="lab">Просрочка дебиторки</div><div class="val">1 247к ₽</div><div class="cap">текущий месяц</div><div class="chg up">▼ −8,5% к пр. месяцу</div></div>
+    </div>
+
+    <div class="row3">
+      <div class="panel">
+        <div class="pt">Бюджет по подразделениям</div>
+        <svg viewBox="0 0 380 230" width="100%" style="display:block">
+          <g stroke="#eef0f3" stroke-width="1" stroke-dasharray="3 4"><line x1="30" y1="30" x2="380" y2="30"/><line x1="30" y1="75" x2="380" y2="75"/><line x1="30" y1="120" x2="380" y2="120"/><line x1="30" y1="165" x2="380" y2="165"/></g>
+          <g fill="#9aa1ac" font-size="9" text-anchor="end" font-family="monospace"><text x="26" y="33">180</text><text x="26" y="78">135</text><text x="26" y="123">90</text><text x="26" y="168">45</text></g>
+          <g>
+            <rect x="42" y="120" width="12" height="45" fill="#cdd3da"/><rect x="56" y="100" width="12" height="65" fill="#ef5350"/>
+            <rect x="98" y="135" width="12" height="30" fill="#cdd3da"/><rect x="112" y="115" width="12" height="50" fill="#ef5350"/>
+            <rect x="154" y="90" width="12" height="75" fill="#cdd3da"/><rect x="168" y="70" width="12" height="95" fill="#ef5350"/>
+            <rect x="210" y="130" width="12" height="35" fill="#cdd3da"/><rect x="224" y="118" width="12" height="47" fill="#ef5350"/>
+            <rect x="266" y="125" width="12" height="40" fill="#cdd3da"/><rect x="280" y="108" width="12" height="57" fill="#ef5350"/>
+            <rect x="322" y="140" width="12" height="25" fill="#cdd3da"/><rect x="336" y="128" width="12" height="37" fill="#ef5350"/>
+          </g>
+          <g fill="#9aa1ac" font-size="8.5" text-anchor="middle"><text x="55" y="180">ФОТ</text><text x="111" y="180">Аренда</text><text x="167" y="180">Маркет.</text><text x="223" y="180">Логист.</text><text x="279" y="180">IT</text><text x="335" y="180">Прочее</text></g>
+        </svg>
+        <div class="legend"><span><i style="background:#cdd3da"></i>План</span><span><i style="background:#ef5350"></i>Факт</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Структура расходов</div>
+        <div style="display:grid;place-items:center;padding:6px 0 4px">
+          <svg viewBox="0 0 170 170" width="170" height="170">
+            <g transform="rotate(-90 85 85)" fill="none" stroke-width="20">
+              <circle cx="85" cy="85" r="66" stroke="#eef0f3"/>
+              <circle cx="85" cy="85" r="66" stroke="#ef5350" stroke-dasharray="187 415" stroke-dashoffset="0"/>
+              <circle cx="85" cy="85" r="66" stroke="#3b82f6" stroke-dasharray="82 520" stroke-dashoffset="-187"/>
+              <circle cx="85" cy="85" r="66" stroke="#22c55e" stroke-dasharray="70 532" stroke-dashoffset="-269"/>
+              <circle cx="85" cy="85" r="66" stroke="#f59e0b" stroke-dasharray="62 540" stroke-dashoffset="-339"/>
+              <circle cx="85" cy="85" r="66" stroke="#8b5cf6" stroke-dasharray="40 562" stroke-dashoffset="-401"/>
+            </g>
+          </svg>
+        </div>
+        <div class="legend">
+          <span><i style="background:#ef5350"></i>ФОТ · 420к</span><span><i style="background:#3b82f6"></i>Аренда · 185к</span>
+          <span><i style="background:#22c55e"></i>Маркетинг · 156к</span><span><i style="background:#f59e0b"></i>Налоги · 140к</span>
+          <span><i style="background:#8b5cf6"></i>Прочее · 89к</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Динамика выручки</div>
+        <svg viewBox="0 0 380 230" width="100%" style="display:block">
+          <g stroke="#eef0f3" stroke-width="1"><line x1="34" y1="30" x2="380" y2="30"/><line x1="34" y1="75" x2="380" y2="75"/><line x1="34" y1="120" x2="380" y2="120"/><line x1="34" y1="165" x2="380" y2="165"/></g>
+          <g fill="#9aa1ac" font-size="9" text-anchor="end" font-family="monospace"><text x="30" y="33">1М</text><text x="30" y="78">750к</text><text x="30" y="123">500к</text><text x="30" y="168">250к</text></g>
+          <polyline fill="none" stroke="#ef5350" stroke-width="2.6" points="50,150 116,135 182,140 248,105 314,112 372,78" style="filter:drop-shadow(0 2px 4px rgba(239,83,80,.3))"/>
+          <g fill="#fff" stroke="#ef5350" stroke-width="2.2"><circle cx="50" cy="150" r="3.4"/><circle cx="116" cy="135" r="3.4"/><circle cx="182" cy="140" r="3.4"/><circle cx="248" cy="105" r="3.4"/><circle cx="314" cy="112" r="3.4"/><circle cx="372" cy="78" r="4"/></g>
+          <g fill="#9aa1ac" font-size="9" text-anchor="middle"><text x="50" y="182">Янв</text><text x="116" y="182">Фев</text><text x="182" y="182">Мар</text><text x="248" y="182">Апр</text><text x="314" y="182">Май</text><text x="372" y="182">Июн</text></g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="row3">
+      <div class="panel">
+        <div class="pt">Исполнение бюджета по статьям</div>
+        <div class="hbar"><div class="bl"><span class="n">ФОТ</span><span class="v">92 / 100к (92%)</span></div><div class="track"><i style="width:92%;background:var(--green)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Аренда</span><span class="v">88 / 95к (93%)</span></div><div class="track"><i style="width:93%;background:var(--green)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Маркетинг</span><span class="v">76 / 85к (89%)</span></div><div class="track"><i style="width:89%;background:var(--amber)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Прочее</span><span class="v">45 / 60к (75%)</span></div><div class="track"><i style="width:75%;background:var(--coral)"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Финансовые показатели</div>
+        <div class="hbar"><div class="bl"><span class="n">Рентабельность</span><span class="v">94%</span></div><div class="track"><i style="width:94%;background:var(--green)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Ликвидность</span><span class="v">87%</span></div><div class="track"><i style="width:87%;background:var(--blue)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Собираемость дебиторки</span><span class="v">92%</span></div><div class="track"><i style="width:92%;background:var(--purple)"></i></div></div>
+        <div class="hbar"><div class="bl"><span class="n">Налоговая дисциплина</span><span class="v">98%</span></div><div class="track"><i style="width:98%;background:var(--green)"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Последние события</div>
+        <div class="feed"><span class="d" style="background:var(--green)"></span><div><div class="nm">Поступление от ООО «Сбер»</div><div class="ds">+140 000 ₽ · разнесено</div><div class="ag">2 часа назад</div></div></div>
+        <div class="feed"><span class="d" style="background:var(--blue)"></span><div><div class="nm">Импорт выписки завершён</div><div class="ds">Альфа-Банк · 312 строк</div><div class="ag">5 часов назад</div></div></div>
+        <div class="feed"><span class="d" style="background:var(--amber)"></span><div><div class="nm">Обновлён платёжный календарь</div><div class="ds">Перенос аренды на 02.07</div><div class="ag">1 день назад</div></div></div>
+        <div class="feed"><span class="d" style="background:var(--purple)"></span><div><div class="nm">Закрыт отчётный период</div><div class="ds">ОПиУ за май готов</div><div class="ag">2 дня назад</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin — Live-мониторинг кассы (по мотивам Energy Management System)</title>
+<style>
+  :root{
+    --bg:#f2f6f3; --card:#ffffff; --line:#e6ece8; --line2:#dde6e0;
+    --ink:#16241c; --muted:#647568; --dim:#9aaba0;
+    --green:#16a34a; --green2:#22c55e; --forest:#15803d; --teal:#0d9488;
+    --kpi1:#1f3b2b; --kpi2:#16301f;
+    --amber:#d97706; --red:#dc2626;
+    --r:16px; --pill:999px;
+    --font:"Inter","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  .app{display:grid;grid-template-columns:74px 1fr;min-height:100vh;}
+
+  /* icon sidebar */
+  .side{padding:18px 0;display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .ico{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:var(--muted);background:#fff;border:1px solid var(--line);cursor:pointer;}
+  .ico svg{width:20px;height:20px;}
+  .ico.on{background:linear-gradient(135deg,var(--green2),var(--forest));color:#fff;border:0;box-shadow:0 10px 22px -8px rgba(21,128,61,.6);}
+  .side .sp{flex:1;}
+  .me{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1f3b2b,#15803d);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;}
+
+  .wrap{padding:22px 26px 44px;min-width:0;}
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
+  h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.02em;}
+  .sub{color:var(--muted);font-size:13px;margin-top:3px;}
+  .rt-mon{font-size:11.5px;font-weight:700;color:var(--green);background:#e7f7ec;border:1px solid #c8ecd3;padding:7px 13px;border-radius:var(--pill);}
+  .rt-mon .d{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green2);margin-right:6px;box-shadow:0 0 6px var(--green2);}
+
+  /* filter bar */
+  .filters{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;align-items:end;}
+  .fld .l{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px;}
+  .fld .sel{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:600;background:#fbfdfc;}
+  .fld .sel .dot{width:7px;height:7px;border-radius:50%;background:var(--green2);margin-right:7px;}
+  .fld .sel svg{width:13px;height:13px;color:var(--dim);}
+  .apply{background:linear-gradient(135deg,var(--green2),var(--forest));color:#fff;font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .apply svg{width:14px;height:14px;}
+
+  /* KPI dark green */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+  .kpi{background:linear-gradient(140deg,var(--kpi1),var(--kpi2));border-radius:var(--r);padding:16px 18px;color:#fff;position:relative;overflow:hidden;box-shadow:0 14px 30px -18px rgba(21,48,31,.8);}
+  .kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:rgba(34,197,94,.16);}
+  .kpi .kt{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .kpi .lab{font-size:11px;letter-spacing:.06em;color:#9ec9ae;text-transform:uppercase;font-weight:700;}
+  .badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:var(--pill);background:rgba(34,197,94,.22);color:#9af0b6;}
+  .badge.hi{background:rgba(217,119,6,.25);color:#fcd34d;}
+  .kpi .val{font-size:26px;font-weight:800;margin:11px 0 6px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;position:relative;z-index:1;}
+  .kpi .val small{font-size:12px;font-weight:600;color:#9ec9ae;margin-left:3px;}
+  .kpi .fo{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .kpi .cap{font-size:11.5px;color:#9ec9ae;} .kpi .chg{font-size:11.5px;font-weight:700;}
+  .up{color:#7ee8a3;} .dn{color:#fda4a4;} .ze{color:#9ec9ae;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1.05fr;gap:16px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;}
+  .pt{font-size:15px;font-weight:800;} .ps{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .donutwrap{display:grid;place-items:center;padding:14px 0 4px;position:relative;}
+  .dctr{position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);text-align:center;}
+  .dctr .c2{font-size:26px;font-weight:800;} .dctr .c1{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .leg{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;margin:8px 0 14px;font-size:11.5px;color:var(--muted);}
+  .leg span{display:flex;align-items:center;gap:6px;} .leg i{width:8px;height:8px;border-radius:50%;}
+  .stat{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:13px;}
+  .stat:first-of-type{border-top:0;} .stat .nm{font-weight:600;} .stat .nm i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green2);margin-right:8px;}
+  .stat .vv{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums;} .stat .vv i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green2);margin-left:8px;}
+
+  .topstats{display:flex;justify-content:space-around;text-align:center;margin:6px 0 4px;}
+  .topstats .v{font-size:18px;font-weight:800;} .topstats .k{font-size:10.5px;color:var(--muted);}
+  .analysis{margin-top:8px;}
+  .analysis .ar{display:flex;justify-content:space-between;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line);}
+  .analysis .ar .al{color:var(--muted);} .analysis .ar .av{font-weight:700;font-variant-numeric:tabular-nums;}
+  .clegend{display:flex;gap:18px;justify-content:center;font-size:11.5px;margin-top:6px;}
+  .clegend span{display:flex;align-items:center;gap:6px;color:var(--muted);} .clegend i{width:14px;height:0;border-top:2px solid;}
+
+  @media(max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr);}.filters{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="ico on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 4 14h7l-1 8 10-12h-7z"/></svg></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M9 15l3-4 3 2 4-6"/></svg></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+    <div class="sp"></div>
+    <div class="me">ДС</div>
+  </aside>
+
+  <div class="wrap">
+    <div class="head">
+      <div><h1>Привет, Дмитрий! 👋</h1><div class="sub">Что смотрим сегодня по кассе?</div></div>
+      <div class="rt-mon"><span class="d"></span>Мониторинг в реальном времени</div>
+    </div>
+
+    <div class="filters">
+      <div class="fld"><div class="l">Тип фильтра</div><div class="sel">Отдельный счёт<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="fld"><div class="l">Юрлицо / счёт</div><div class="sel"><span><span class="dot" style="display:inline-block"></span>Расчётный · Сбер</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="fld"><div class="l">Режим данных</div><div class="sel">Реал-тайм<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="fld"><div class="l">Период</div><div class="sel">Сегодня<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg>Применить</div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="kt"><span class="lab">Остаток всего</span><span class="badge">норма</span></div><div class="val">2 458,9к<small>₽</small></div><div class="fo"><span class="cap">По всем счетам</span><span class="chg up">▲ +5,2%</span></div></div>
+      <div class="kpi"><div class="kt"><span class="lab">Поступления</span><span class="badge hi">высоко</span></div><div class="val">893,2к<small>₽</small></div><div class="fo"><span class="cap">Сегодня</span><span class="chg up">▲ +12,8%</span></div></div>
+      <div class="kpi"><div class="kt"><span class="lab">Списания</span><span class="badge">норма</span></div><div class="val">342,1к<small>₽</small></div><div class="fo"><span class="cap">Сегодня</span><span class="chg dn">▼ −2,1%</span></div></div>
+      <div class="kpi"><div class="kt"><span class="lab">Ликвидность</span><span class="badge">оптимально</span></div><div class="val">0.92</div><div class="fo"><span class="cap">Коэффициент</span><span class="chg ze">— 0,0%</span></div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="pt">Оборот за сегодня</div>
+        <div class="ps">Распределение движений по счетам</div>
+        <div class="donutwrap">
+          <svg viewBox="0 0 200 200" width="200" height="200">
+            <g transform="rotate(-90 100 100)" fill="none" stroke-width="22">
+              <circle cx="100" cy="100" r="78" stroke="#eef3f0"/>
+              <circle cx="100" cy="100" r="78" stroke="#15803d" stroke-dasharray="186 304" stroke-dashoffset="0"/>
+              <circle cx="100" cy="100" r="78" stroke="#22c55e" stroke-dasharray="137 353" stroke-dashoffset="-186"/>
+              <circle cx="100" cy="100" r="78" stroke="#4ade80" stroke-dasharray="98 392" stroke-dashoffset="-323"/>
+              <circle cx="100" cy="100" r="78" stroke="#86efac" stroke-dasharray="69 421" stroke-dashoffset="-421"/>
+            </g>
+          </svg>
+          <div class="dctr"><div class="c2">1 235к</div><div class="c1">оборот, ₽</div></div>
+        </div>
+        <div class="leg"><span><i style="background:#15803d"></i>Сбер</span><span><i style="background:#22c55e"></i>Альфа</span><span><i style="background:#4ade80"></i>Тинькофф</span><span><i style="background:#86efac"></i>Касса</span></div>
+        <div class="stat"><div class="nm"><i></i>Расчётный · Сбер</div><div class="vv">2 400к ₽</div></div>
+        <div class="stat"><div class="nm"><i></i>Расчётный · Альфа</div><div class="vv">456,7к ₽</div></div>
+        <div class="stat"><div class="nm"><i></i>Расчётный · Тинькофф</div><div class="vv">189,0к ₽</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">План vs Факт по часам</div>
+        <div class="ps">Поступления против плана в течение дня</div>
+        <div class="topstats"><div><div class="v">1 058к</div><div class="k">Сред. приход ₽</div></div><div><div class="v">1 350к</div><div class="k">Пик ₽</div></div><div><div class="v">88%</div><div class="k">Исполнение плана</div></div></div>
+        <svg viewBox="0 0 640 270" width="100%" style="display:block">
+          <g stroke="#eef3f0" stroke-width="1"><line x1="44" y1="40" x2="640" y2="40"/><line x1="44" y1="95" x2="640" y2="95"/><line x1="44" y1="150" x2="640" y2="150"/><line x1="44" y1="205" x2="640" y2="205"/></g>
+          <g fill="#9aaba0" font-size="10" text-anchor="end" font-family="monospace"><text x="38" y="44">1400</text><text x="38" y="99">1050</text><text x="38" y="154">700</text><text x="38" y="209">350</text></g>
+          <polyline fill="none" stroke="#d1d9d4" stroke-width="2" stroke-dasharray="6 5" points="70,150 130,140 190,160 250,120 310,110 370,100 430,92 490,108 550,86 610,120"/>
+          <g fill="#22c55e">
+            <circle cx="70" cy="170" r="4"/><circle cx="130" cy="186" r="4"/><circle cx="190" cy="200" r="4"/><circle cx="250" cy="130" r="4"/><circle cx="310" cy="120" r="4"/><circle cx="370" cy="135" r="4"/><circle cx="430" cy="100" r="4"/><circle cx="490" cy="116" r="4"/><circle cx="550" cy="92" r="4"/><circle cx="610" cy="138" r="4"/>
+          </g>
+          <g fill="#9aaba0" font-size="10" text-anchor="middle" font-family="monospace"><text x="70" y="228">00:00</text><text x="190" y="228">06:00</text><text x="310" y="228">12:00</text><text x="430" y="228">16:00</text><text x="550" y="228">20:00</text></g>
+        </svg>
+        <div class="clegend"><span><i style="border-color:#22c55e"></i>Факт</span><span><i style="border-color:#d1d9d4"></i>План</span></div>
+        <div class="analysis">
+          <div class="ar"><span class="al">Пик поступлений</span><span class="av">18:00 · 1 350к ₽</span></div>
+          <div class="ar"><span class="al">Минимум</span><span class="av">04:00 · 650к ₽</span></div>
+          <div class="ar"><span class="al">Отклонение от плана</span><span class="av">−58,3к ₽ (−4,2%)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

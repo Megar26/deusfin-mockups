@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeusFin Аудитор — скоринг финздоровья (по мотивам ATS Resume Analyzer)</title>
+<style>
+  :root{
+    --ink:#2a2342; --muted:#7b7596; --dim:#a39fbb; --line:#ece9f6; --line2:#e3def2;
+    --purple:#8b5cf6; --pink:#ec4899; --grad:linear-gradient(135deg,#8b5cf6,#ec4899);
+    --blue:#3b82f6; --green:#22c55e; --orange:#f59e0b; --red:#ef4444; --cyan:#06b6d4;
+    --card:#ffffff; --r:18px; --pill:999px;
+    --font:"Inter","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;
+    background:radial-gradient(80% 60% at 100% 0%,#f3ecff 0%,transparent 55%),radial-gradient(70% 50% at 0% 100%,#ffe9f5 0%,transparent 55%),#faf9fe;}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+
+  /* sidebar */
+  .side{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;}
+  .logo{display:flex;align-items:center;gap:11px;padding:6px 8px 18px;}
+  .logo .mk{width:40px;height:40px;border-radius:13px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 10px 22px -8px rgba(236,72,153,.55);}
+  .logo .mk svg{width:21px;height:21px;}
+  .logo .b1{font-weight:800;font-size:14.5px;} .logo .b2{font-size:10.5px;color:var(--dim);margin-top:1px;}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;}
+  .nav a svg{width:17px;height:17px;flex:none;}
+  .nav a.on{background:var(--grad);color:#fff;box-shadow:0 10px 22px -10px rgba(139,92,246,.7);}
+  .nav a:not(.on):hover{background:#f4f1fc;color:var(--ink);}
+  .side .sp{flex:1;}
+  .demo{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--purple);background:#f3ecff;border:1px solid var(--line2);padding:9px 12px;border-radius:11px;font-weight:700;}
+
+  /* main */
+  .wrap{padding:22px 26px 44px;}
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
+  h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:4px;}
+  .hr{display:flex;align-items:center;gap:10px;}
+  .chip{font-size:12px;font-weight:700;color:var(--muted);background:#fff;border:1px solid var(--line2);padding:7px 13px;border-radius:var(--pill);display:flex;align-items:center;gap:7px;}
+  .chip .lk{color:var(--blue);} .chip .d{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
+  .upd{font-size:11.5px;color:var(--dim);font-family:var(--mono);background:#fff;border:1px solid var(--line2);padding:7px 11px;border-radius:var(--pill);}
+
+  .banner{background:linear-gradient(120deg,#f6f0ff,#fdeef7);border:1px solid var(--line2);border-radius:var(--r);padding:16px 18px;margin-bottom:18px;}
+  .banner .bt{font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .banner .bt svg{width:17px;height:17px;color:var(--purple);}
+  .banner .bd{font-size:12.5px;color:var(--muted);margin:6px 0 12px;}
+  .checks{display:flex;flex-wrap:wrap;gap:18px;}
+  .checks span{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+  .checks span::before{content:"✓";color:var(--green);font-weight:800;}
+  .banner .row2{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+  .banner .row2 .lnk{font-size:12.5px;color:var(--purple);font-weight:700;}
+  .banner .acts{display:flex;gap:10px;}
+  .btn{font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:var(--pill);cursor:pointer;}
+  .btn.p{background:var(--blue);color:#fff;} .btn.g{background:#fff;border:1px solid var(--line2);color:var(--muted);}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 10px 26px -18px rgba(80,50,140,.35);}
+  .kpi .kt{display:flex;align-items:flex-start;justify-content:space-between;}
+  .kpi .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;}
+  .kpi .ic svg{width:19px;height:19px;}
+  .kpi .chg{font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:4px;}
+  .up{color:var(--green);} .down{color:var(--green);} .bad{color:var(--red);}
+  .kpi .val{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:13px 0 3px;font-variant-numeric:tabular-nums;}
+  .kpi .lab{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .ic.p{background:linear-gradient(135deg,#8b5cf6,#a855f7);} .ic.b{background:linear-gradient(135deg,#3b82f6,#06b6d4);} .ic.g{background:linear-gradient(135deg,#22c55e,#10b981);} .ic.o{background:linear-gradient(135deg,#f59e0b,#ef4444);}
+
+  .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 10px 26px -20px rgba(80,50,140,.3);}
+  .pt{font-size:15px;font-weight:800;margin-bottom:2px;} .ps{font-size:12px;color:var(--muted);margin-bottom:8px;}
+
+  .dwrap{display:flex;align-items:center;gap:18px;}
+  .donut{width:130px;height:130px;flex:none;position:relative;}
+  .donut .ctr{position:absolute;inset:0;display:grid;place-content:center;text-align:center;}
+  .donut .ctr .c1{font-size:11px;color:var(--dim);} .donut .ctr .c2{font-size:18px;font-weight:800;}
+  .leg{display:flex;flex-direction:column;gap:9px;flex:1;font-size:12.5px;}
+  .leg .r{display:flex;align-items:center;gap:9px;} .leg .r i{width:9px;height:9px;border-radius:50%;}
+  .leg .r .vv{margin-left:auto;font-weight:700;color:var(--muted);}
+
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px 0;color:var(--dim);}
+  .empty .e{width:54px;height:54px;border-radius:50%;background:#f4f1fc;display:grid;place-items:center;}
+  .empty .e svg{width:24px;height:24px;color:var(--dim);} .empty .t{font-size:13px;}
+
+  .res{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);}
+  .res:first-of-type{border-top:0;}
+  .res .av{width:38px;height:38px;border-radius:11px;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none;}
+  .res .nm{font-size:13.5px;font-weight:700;} .res .dt{font-size:11.5px;color:var(--dim);margin-top:2px;}
+  .res .rt{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .res .sc{font-size:12.5px;font-weight:800;color:var(--purple);display:flex;align-items:center;gap:4px;}
+  .res .st{font-size:10.5px;font-weight:700;color:var(--green);background:#e7f8ee;padding:3px 9px;border-radius:var(--pill);}
+  .res .io{color:var(--dim);display:flex;gap:8px;} .res .io svg{width:15px;height:15px;}
+  .va{font-size:12px;color:var(--purple);font-weight:700;}
+
+  @media(max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.side{display:none;}.app{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M3 12a9 9 0 1 0 3-6.7"/></svg></span><div><div class="b1">DeusFin Аудитор</div><div class="b2">AI-скоринг финансов</div></div></div>
+    <nav class="nav">
+      <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>Дашборд</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M8 3h7l5 5v13H8zM9 13l2 2 4-4" /></svg>Аудит отчётов</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6"/></svg>Контрагенты</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Документы</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M9 15l3-4 3 2 4-6"/></svg>Аналитика</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Настройки</a>
+    </nav>
+    <div class="sp"></div>
+    <div class="demo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Демо-режим</div>
+  </aside>
+
+  <div class="wrap">
+    <div class="head">
+      <div><h1>Финансовый аудитор</h1><div class="sub">AI-скоринг финансового здоровья бизнеса и анализ документов.</div></div>
+      <div class="hr"><span class="chip"><span class="d"></span>Демо-режим <span class="lk">Подключить</span></span><span class="upd">Обновлено 11:12</span></div>
+    </div>
+
+    <div class="banner">
+      <div class="bt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Демо-режим активен</div>
+      <div class="bd">Вы видите полный интерфейс аудитора с реалистичными демо-данными. Все функции доступны для теста и демонстрации команде.</div>
+      <div class="checks"><span>Интерактивный UI</span><span>Реалистичный AI-скоринг</span><span>Загрузка выписок</span><span>Графики и распределения</span></div>
+      <div class="row2"><span class="lnk">Нужен реальный анализ? Подключите бэкенд DeusFin →</span><div class="acts"><span class="btn p">Подключить API</span><span class="btn g">Инструкция</span></div></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="kt"><span class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z"/></svg></span><span class="chg up">▲ +5%</span></div><div class="val">90%</div><div class="lab">Индекс финздоровья</div></div>
+      <div class="kpi"><div class="kt"><span class="ic p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="chg up">▲ +12%</span></div><div class="val">248</div><div class="lab">Проверено документов</div></div>
+      <div class="kpi"><div class="kt"><span class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.4"/></svg></span><span class="chg up">▲ +8%</span></div><div class="val">34 дня</div><div class="lab">Кассовый запас</div></div>
+      <div class="kpi"><div class="kt"><span class="ic o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="chg down">▼ −2 дня</span></div><div class="val">4 дня</div><div class="lab">Срок закрытия месяца</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="pt">Загрузка выписок по месяцам</div>
+        <div class="ps">Обработано документов</div>
+        <svg viewBox="0 0 640 250" width="100%" preserveAspectRatio="none" style="display:block">
+          <defs><linearGradient id="ap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".35"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
+          <g stroke="#ece9f6" stroke-width="1"><line x1="40" y1="40" x2="640" y2="40"/><line x1="40" y1="95" x2="640" y2="95"/><line x1="40" y1="150" x2="640" y2="150"/><line x1="40" y1="205" x2="640" y2="205"/></g>
+          <g fill="#a39fbb" font-size="11" text-anchor="end" font-family="monospace"><text x="34" y="44">40</text><text x="34" y="99">30</text><text x="34" y="154">20</text><text x="34" y="209">10</text></g>
+          <path d="M70,180 L184,150 L298,165 L412,110 L526,128 L632,86 L632,205 L70,205 Z" fill="url(#ap)"/>
+          <polyline fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="70,180 184,150 298,165 412,110 526,128 632,86"/>
+          <g fill="#fff" stroke="#ec4899" stroke-width="2.4"><circle cx="412" cy="110" r="3.6"/><circle cx="632" cy="86" r="4.4"/></g>
+          <g fill="#a39fbb" font-size="11" text-anchor="middle" font-family="monospace"><text x="70" y="232">Янв</text><text x="184" y="232">Фев</text><text x="298" y="232">Мар</text><text x="412" y="232">Апр</text><text x="526" y="232">Май</text><text x="632" y="232">Июн</text></g>
+        </svg>
+      </div>
+      <div class="panel">
+        <div class="pt">Структура расходов</div>
+        <div class="ps">Топ категории за месяц</div>
+        <div class="dwrap">
+          <div class="donut">
+            <svg viewBox="0 0 140 140" width="130" height="130">
+              <g transform="rotate(-90 70 70)" fill="none" stroke-width="15">
+                <circle cx="70" cy="70" r="55" stroke="#f0edf9"/>
+                <circle cx="70" cy="70" r="55" stroke="#8b5cf6" stroke-dasharray="155.5 190" stroke-dashoffset="0"/>
+                <circle cx="70" cy="70" r="55" stroke="#ec4899" stroke-dasharray="62 283.5" stroke-dashoffset="-155.5"/>
+                <circle cx="70" cy="70" r="55" stroke="#3b82f6" stroke-dasharray="52 293.5" stroke-dashoffset="-217.5"/>
+                <circle cx="70" cy="70" r="55" stroke="#f59e0b" stroke-dasharray="48 297.5" stroke-dashoffset="-269.5"/>
+                <circle cx="70" cy="70" r="55" stroke="#22c55e" stroke-dasharray="28 317.5" stroke-dashoffset="-317.5"/>
+              </g>
+            </svg>
+            <div class="ctr"><div><div class="c1">Всего</div><div class="c2">412к ₽</div></div></div>
+          </div>
+          <div class="leg">
+            <div class="r"><i style="background:#8b5cf6"></i>ФОТ<span class="vv">45%</span></div>
+            <div class="r"><i style="background:#ec4899"></i>Аренда<span class="vv">18%</span></div>
+            <div class="r"><i style="background:#3b82f6"></i>Маркетинг<span class="vv">15%</span></div>
+            <div class="r"><i style="background:#f59e0b"></i>Налоги<span class="vv">14%</span></div>
+            <div class="r"><i style="background:#22c55e"></i>Прочее<span class="vv">8%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="pt">Очередь обработки <span style="float:right;font-size:11.5px;color:var(--dim);font-weight:600">0 активных</span></div>
+        <div class="empty"><div class="e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="t">Нет документов в обработке</div></div>
+      </div>
+      <div class="panel">
+        <div class="pt">Последние проверки <span style="float:right;font-size:11.5px;color:var(--purple);font-weight:700">Все</span></div>
+        <div style="margin-top:6px">
+          <div class="res"><span class="av">СБ</span><div><div class="nm">Выписка Сбербанк · июнь</div><div class="dt">19.06.2026</div></div><div class="rt"><span class="sc">★ 92%</span><span class="st">готово</span><span class="io"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span></div></div>
+          <div class="res"><span class="av">АЛ</span><div><div class="nm">Выписка Альфа-Банк · июнь</div><div class="dt">20.06.2026</div></div><div class="rt"><span class="sc">★ 87%</span><span class="st">готово</span><span class="io"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span></div></div>
+          <div class="res"><span class="av">ОП</span><div><div class="nm">ОПиУ · 1 полугодие</div><div class="dt">21.06.2026</div></div><div class="rt"><span class="sc">★ 95%</span><span class="st">готово</span><span class="io"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
